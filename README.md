@@ -498,7 +498,7 @@ Voila!
 *Note: a useful default behaviour of tls in Kubernetes is that it automatically directs any http requests to https. Sweet!*
 
 
-#### Signed certificates using letsencrypt
+### Signed certificates using letsencrypt
 Yeah, but I want signed certificates. I haven't got time to be continually having the same conversation repeatedly with multiple clients.
 
 You can generate a certificate signing request (CSR) based off your private key and send your CSR to a trusted certificate authority (e.g. [Thawtes](https://thawtes.com), [GoDaddy](https://godaddy.com)) for signing. You can then use the resulting certificate the certificate authority provides to create a new Kubernetes secret object for your domain. But I have dozens of domains and dozens of clients... The overheads (dollars and administration) associated with paying a certificate authority $100 a year quickly add up.
