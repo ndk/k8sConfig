@@ -25,7 +25,6 @@ A microk8s Kubernetes that serves all my non-production web apps. All apps serve
 My goal is to increase my operational efficiency, increase my product deployment velocity, increase product quality and lower costs.
 
 ### So, what problem are we solving?
-
 Managed Kubernetes in the cloud can be expensive. Configuring your own microk8s Kubernetes on your own VM can be much cheaper (about 10 times cheaper in my case).
 
 If you're an indy developer or small software dev team (like me!), things can get relatively expensive. Below are some typical monthly costs (as of March 2019) for a Kubernetes application with three environments (PROD, UAT and DEV). Pricing structures vary considerably across the major cloud providers but in my case, the cost of running an AWS Kubernetes cluster could easily run over $1000 a month. Check with your cloud provider for most up-to-date pricing information:
@@ -51,6 +50,7 @@ I build software applications for a living and the DevOps pipeline I use for eve
 You can save a lot of money by deploying to cheaper Kubernetes infrastructure.
 
 ### How I arrived at Kubernetes
+
 It's been quite a journey. Back in the day, I had an account on a Sun Microsystems machine at my university. I could serve a web page to anyone in the world from my /~hynese public folder. I found this pretty profound at the time. I've had a couple of these technology brain spin moments in my time, but that's for another article.
 Some of us may remember the days of writing your web page in HTML, CSS and JavaScript and using FTP to sync your local folder with your remote folder. There's so much wrong with this approach and that's also for another article.
 
@@ -81,6 +81,7 @@ This article is divided into two parts:
 **Part 2**: Configuring microk8s to serve the specific needs of my company: a low cost infrastructure to deploy non-production applications to.
 
 ## Part 1: Setting up a microk8s box from scratch
+
 Installing microk8s on Amazon EC2 (infrastrcture-as-a-service) is easy. Simply spin up an Ubuntu 18.04 instance. We'll be running several containers so recommend at least a t3.small (or whatever the equivalent is on Google or Azure). Note on storage: recommend at least 32GB of storage. It's very difficult to add additional storage without stopping the machine, expanding the partition and restarting. I tried (and failed) to use external storage for storing snap data.
 
 First, update your system:
@@ -142,6 +143,7 @@ Now if we do:
 Everything should look in order.
 
 ### Install kubernetes addons
+
 For the setup in the article, I'll be utilising additional addons:
 microk8s.enable dns dashboard ingress registry
 
@@ -199,6 +201,7 @@ http://10.152.183.236/
 If you see "Welcome to nginx!", congratulations; you've just successfully served a web page from your a microk8s cluster.
 
 ### DNS setup
+
 It's useful to be able to lookup our nginx using its name. For example:
 
 ```
@@ -234,6 +237,7 @@ I'll show how to configure a Kubernetes ingress featuring the following:
 * basic authorization of all non-production endpoints
 
 ### Set up DNS and handle multiple domain names
+
 Before we can do anything, we must set up DNS entries. The purpose of this article is not to explain DNS and I'll assume familiarity with DNS records. I personally use my own DNS server (I highly recommend mailinabox) and am free from vendor-specific services such as Route53 (Amazon Web Services). For production applications, I recommend using an enterprise-grade DNS service such as Route53.
 
 For the purposes of this article, let's assume we have two domain names we want our microk8s Kubernetes non-elastic cluster to handle:
@@ -257,6 +261,7 @@ Here are the required DNS records:
 When using production infrastructure, simply update the DNS records.
 
 ### Setting up the ingress
+
 For this article, the ingress will support two domains:
 
 * rexsystems.co.uk
@@ -374,6 +379,7 @@ Navigate to your domains (http://rexsystems.co.uk and http://ideahopper.org) and
 Voila!
 
 ### Authorization
+
 We don't want the public to have access to non production environments. So placing a username and password on all non-production endpoints makes sense. I use Basic http Authorization in this setup. There are more advanced authorization and authentication mechanisms available, but these are overkill for my needs. **Note: I highly recommend not using Basic Authorization without SSL/https enabled. Using Basic Authorization over http transmits your username/password pair in the clear. Make sure you know what you are doing**.
 
 Here is a Kubernetes ingress with basic authorization:
@@ -455,9 +461,11 @@ Navigate to http://nonprod.rexsystems.co.uk/dev/ and you should be prompted to e
 Voila!
 
 ### Configuring the cluster to use SSL
+
 SSL is highly desirable for both production and non-production systems. If you're happy to use self-signed certificates, the configuration is straightforward. If you want to use signed SSL certificates; there are a few more steps. I use letsencrypt (ISRG) to sign my certificates. Some of my clients have their own preferred SSL certificate signer and it's easy to modify my configuration to accommodate this.
 
-### Self-signed certificates
+#### Self-signed certificates
+
 If you are happy enough with browser warnings (and with explaining this to your client), you can use self-signed certificates. 
 
 ```
@@ -498,7 +506,8 @@ Voila!
 *Note: a useful default behaviour of tls in Kubernetes is that it automatically directs any http requests to https. Sweet!*
 
 
-### Signed certificates using letsencrypt
+#### Signed certificates using letsencrypt
+
 Yeah, but I want signed certificates. I haven't got time to be continually having the same conversation repeatedly with multiple clients.
 
 You can generate a certificate signing request (CSR) based off your private key and send your CSR to a trusted certificate authority (e.g. [Thawtes](https://thawtes.com), [GoDaddy](https://godaddy.com)) for signing. You can then use the resulting certificate the certificate authority provides to create a new Kubernetes secret object for your domain. But I have dozens of domains and dozens of clients... The overheads (dollars and administration) associated with paying a certificate authority $100 a year quickly add up.
