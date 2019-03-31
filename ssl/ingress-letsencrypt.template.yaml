@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-letsencrypt
+  annotations:
+    # Letsencrypt TLS/SSL validation challenge:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location ~ .well-known/acme-challenge/$CERTBOT_TOKEN {
+        return 200 "$CERTBOT_VALIDATION";
+      }
+      #nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: $CERTBOT_DOMAIN
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: dummy
+          servicePort: 80
