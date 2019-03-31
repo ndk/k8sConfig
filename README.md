@@ -166,7 +166,7 @@ To set up a tunnel to your EC2 instance, simply do:
 
 , where $REMOTE_EC2 is your instance's IP address and mykey.pem is your Amazon private ssh key.
 
-#### Check everything is working
+### Check everything is working
 
 To check everything is working OK, let's deploy a simple nginx deployment:
 ```
@@ -457,7 +457,7 @@ Voila!
 ### Configuring the cluster to use SSL
 SSL is highly desirable for both production and non-production systems. If you're happy to use self-signed certificates, the configuration is straightforward. If you want to use signed SSL certificates; there are a few more steps. I use letsencrypt (ISRG) to sign my certificates. Some of my clients have their own preferred SSL certificate signer and it's easy to modify my configuration to accommodate this.
 
-#### Self-signed certificates
+### Self-signed certificates
 If you are happy enough with browser warnings (and with explaining this to your client), you can use self-signed certificates. 
 
 ```
