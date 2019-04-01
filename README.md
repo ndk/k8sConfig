@@ -10,12 +10,11 @@ This technical article gives instructions on how to run microk8s Kubernets in th
 
 * Installation on Ubuntu 18.04
 * DNS set up
-* Firewall configuration
+* Firewall configuration (Kubernetes cluster is secure - only http and https accessible)
 * SSL using letsencrypt
 * Multiple domain names from the same Kubernetes cluster
 * Kubernetes ingress
 * Authentication of routes
-* Running Jenkins on microk8s Kubernetes
 * Running a private Docker registry on microk8s Kubernetes
 * Connecting Docker for Mac to microk8s Kubernetes cluster
 
@@ -193,13 +192,11 @@ Note: we're using a "clusterip" type service. There are 4 types of service avail
 
 Note: **loadbalancer is not available on microk8s**.
 
-It's worth researching details on each type of service. In a production system (i.e. not microk8s), I'd expect loadbalancer to be used and not clusterip. Very often this is the only difference between your production and non-production Kubernetes deployments.
-
-It's also worth noting that the loadbalancer service differs across cloud providers - Amazon implements load balancing different to the way Microsoft and Google do. Load balancer pricing also varies. It's worth looking in to how this is done and how much things will cost.
+It's worth researching details on each type of service. In a production system (i.e. not microk8s), I'd expect loadbalancer to be used and not clusterip. Very often this is the only difference between your production and non-production Kubernetes deployments. It's also worth noting that the loadbalancer service differs across cloud providers - Amazon implements load balancing different to the way Microsoft and Google do. Load balancer pricing also varies a lot between cloud providers.
 
 Now that nginx is running and we've exposed a clusterip service, let's get the ip address:
 
-`microk8s.kubectl get all - all-namespaces`
+`microk8s.kubectl get all --all-namespaces`
 
 Once we get the ip address, simply type it into a web browser on your development maching (in my case Brave browser on a Mac):
 
@@ -282,7 +279,7 @@ rexsystems.co.uk has two environments (DEV and PROD). ideahopper.org has three e
 * http://nonprod.ideahopper.org/dev/ (authorization required)
 * http://nonprod.ideahopper.org/uat/ (authorization required)
 
-We want authorization on all nonprod environments. So, we will have two ingresses:
+We want authorization on all nonprod environments and no authorization on all prod environments. Because of this split, we'll create two separate ingresses:
 * ingress-noauth.yaml
 * ingress-auth.yaml
 
@@ -332,7 +329,7 @@ spec:
 #  - secretName: tls-secret-ideahopper-org
 ```
 
-Note: the last three lines are commented out. This is the SSL/https configuration - we'll get to this in the next section...
+Note: the last four lines are commented out. This is the SSL/https configuration - we'll get to this in the next section...
 
 It won't work if you try to create the ingress with:
 
@@ -340,7 +337,7 @@ It won't work if you try to create the ingress with:
 microk8s.kubectl create -f ingress-noauth.yaml
 ```
 
-You first need run two containers (rex-prod and ideahopper-prod); with each container having its own service to expose the container to the cluster.
+You first need to start two containers (rex-prod and ideahopper-prod); with each container having its own service to expose the container to the cluster.
 
 Let's spin up some bog standard nginx containers:
 ```
@@ -387,7 +384,7 @@ Voila!
 
 ### Authorization
 
-We don't want the public to have access to non production environments. So placing a username and password on all non-production endpoints makes sense. I use Basic http Authorization in this setup. There are more advanced authorization and authentication mechanisms available, but these are overkill for my needs. **Note: I highly recommend not using Basic Authorization without SSL/https enabled. Using Basic Authorization over http transmits your username/password pair in the clear. Make sure you know what you are doing**.
+We don't want to allow public access to non-production environments. So placing a username and password on all non-production endpoints makes sense. I use Basic http Authorization in this setup. There are more advanced authorization and authentication mechanisms available, but these are overkill for my needs. **Note: I highly recommend not using Basic Authorization without SSL/https enabled. Using Basic Authorization over http transmits your username/password pair in the clear. Make sure you know what you are doing**.
 
 Here is a Kubernetes ingress with basic authorization:
 
@@ -427,7 +424,7 @@ spec:
 #  - secretName: tls-secret-nonprod-ideahopper-org
 ```
 
-Again, the last two lines are commented out - I'll show you how to enable SSL in the next section.
+Again, the last three lines are commented out - I'll show you how to enable SSL in the next section.
 
 I've configured the ingress to route two non-production domain names serving three environments:
 
@@ -445,10 +442,10 @@ You need to set up the containers and services just like you did for "ingress-no
 sudo apt-get install apache2-utils
 ```
 
-Now, here's a one-liner to create a secret:
+Now, here's a one-liner to create a [secret](https://kubernetes.io/docs/concepts/configuration/secret/) called "htsecret":
 
 ```
-microk8s.kubectl create secret generic htsecret - from-literal=auth=`htpasswd -n your_username | tr -d '\n'`
+microk8s.kubectl create secret generic htsecret --from-literal=auth=`htpasswd -n your_username | tr -d '\n'`
 ```
 You'll be prompted to enter a password and password verification.
 Now check the secret is set up and working:
@@ -460,7 +457,7 @@ You can now start your nonprod ingress featuring authorization:
 # start our nonprod ingress:
 microk8s.kubectl create -f ingress-auth.yaml
 # Check everything on our microk8s cluster is OK:
-microk8s.kubectl get all - all-namespaces
+microk8s.kubectl get all --all-namespaces
 ```
 
 Navigate to http://nonprod.rexsystems.co.uk/dev/ and you should be prompted to enter your password. On successful password authorization, you will see your nginx default homepage.
@@ -497,7 +494,7 @@ microk8s.kubectl create secret tls tls-secret-nonprod-ideahopper-org --cert ./no
 microk8s.kubectl get secret
 ```
 
-Now if edit both ingresses ("ingress-auth.yaml" and "ingress-noauth.yaml") to remove the TLS section that's commented out at the bottom.
+Next edit both ingresses ("ingress-auth.yaml" and "ingress-noauth.yaml") to remove the TLS section that's commented out at the bottom.
 
 Update the ingresses with:
 
@@ -506,7 +503,7 @@ microk8s.kubectl apply -f ingress-auth.yaml
 microk8s.kubectl apply -f ingress-noauth.yaml
 ```
 
-Now if you navigate to rexsystems.co.uk it will return over https://
+Now if you navigate to rexsystems.co.uk it will return over https:// (with browser warnings)
 
 Voila!
 
@@ -519,7 +516,7 @@ Yeah, but I want signed certificates. I haven't got time to be continually havin
 
 You can generate a certificate signing request (CSR) based off your private key and send your CSR to a trusted certificate authority (e.g. [Thawtes](https://thawtes.com), [GoDaddy](https://godaddy.com)) for signing. You can then use the resulting certificate the certificate authority provides to create a new Kubernetes secret object for your domain. But I have dozens of domains and dozens of clients... The overheads (dollars and administration) associated with paying a certificate authority $100 a year quickly add up.
 
-So, I just use [letsencrypt](https://letsencrypt.org). But it's not as simple as generating a CSR and getting letsencrypt to sign it. Letsencrypt require you to verify that you own the domain you're asking them to sign. There are two options for certificate requesters (i.e. me) to prove ownership: i) by updating my domain's DNS records to contain a TXT record or ii) to serve a shared secret via http. I prefer the latter and will now show you how to do this.
+I use [letsencrypt](https://letsencrypt.org). But using letsencrypt is not as simple as generating a CSR and asking letsencrypt to sign it. Letsencrypt require you to verify that you own the domain you're asking them to sign. There are two options for certificate requesters (i.e. me) to prove ownership: i) by updating my domain's DNS records to contain a TXT record or ii) to serve a shared secret via http. I prefer the latter and will now show you how to do this.
 
 First create an ingress especially for letsencrypt called "ingress-letsencrypt.template.yaml". Note that this file is a template for a yaml file.
 
@@ -657,6 +654,8 @@ sudo crontab -e
 ### Bonus: Add a Docker for Desktop profile
 
 Now that your cluster is set up and configured, let's add it to [Docker for Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac).
+
+**Make sure sshuttle is running. microk8s on Docker for Mac won't run unless sshuttle is running.**
 
 Existing Kubernetes configs are often (Mac OSX) stored in:
 
