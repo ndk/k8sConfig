@@ -14,7 +14,7 @@ This technical article gives instructions on how to run microk8s Kubernets in th
 * SSL using letsencrypt
 * Multiple domain names from the same Kubernetes cluster
 * Kubernetes ingress
-* Authentication of routes
+* Authentication of specific routes
 * Running a private Docker registry on microk8s Kubernetes
 * Connecting Docker for Mac to microk8s Kubernetes cluster
 
@@ -675,6 +675,16 @@ Add a microk8s cluster ("microk8s-cluster") to your Kubernetes config with:
 
 ```
 kubectl config set-cluster microk8s-cluster --server=$APISERVER --insecure-skip-tls-verify=true
+```
+
+, where $APISERVER can be found by running below command on your microk8s cluster:
+
+```
+microk8s.kubectl describe service kubernetes
+```
+
+```
+export APISERVER=https://10.152.183.1:443
 ```
 
 Add a microk8s user ("microk8s-user") to your Kubernetes config with:
