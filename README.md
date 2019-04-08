@@ -669,10 +669,42 @@ sudo crontab -e
 , where "renew-and-restart.sh" renews the certs, updates the Kubernetes secrets objects, deletes the letsencrypt temporary ingress and restarts the ingresses:
 
 ```
+#!/bin/bash
+
+if (( "$#" < 1 ))
+then
+    echo "No domain name set. Pass a domain name and try again."
+    echo "Usage: ./renew-and-restart.sh domain.name"
+exit 1
+fi
+
+export CERTBOT_DOMAIN=$1
+
+# get this script's directory (works on Linux, OSX, etc.)
+# See: https://stackoverflow.com/a/17744637
+thisScriptsDir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
+pushd $thisScriptsDir/letsencrypt
+
+# renew certs:
+echo " -> Renewing certificicates..."
+./gen-certs.sh $CERTBOT_DOMAIN renew
+
+# update secrets:
+echo " -> Updating Kubernetes secrets..."
+./gen-secrets.sh $CERTBOT_DOMAIN
+
+popd
+
+# restart ingress:
+pushd $thisScriptsDir
+echo " -> Restarting the ingress(es)..."
+./ingress-restart.sh
+
+popd
 
 ```
 
-### Bonus: Add a Docker for Desktop profile
+### Bonus 1: Add a Docker for Desktop profile
 
 Now that your cluster is set up and configured, let's add it to [Docker for Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac).
 
@@ -737,3 +769,94 @@ kubectl get pods
 Voila!
 
 You can now seamlessly deploy containers to microk8s in the cloud.
+
+### Bonus 2: A private Docker registry
+
+First off, enable the registry on your microk8s server with:
+
+`microk8s.enable registry`
+
+The registry's IP address can be got from:
+
+`nslookup registry.container-registry.svc.cluster.local`
+
+It should be listening on port 5000.
+
+Recent versions of microk8s no longer provide the `microk8s.docker` command.
+
+Ubuntu users should install their own docker:
+
+`sudo apt-get install docker.io`
+
+On the command line, `docker` should now be available.
+
+Docker needs a slight change to its configuration - it is set up only to trust known Docker registries with TLS, etc. Because we want to use our own Docker registry (with no TLS), we must register our registry in the daemon.json configuration file for our docker.io installation.
+
+`sudo vim /etc/docker/daemon.json`
+
+And add the following lines (where 10.152.0.0 is a trusted microk8s subnet):
+
+```
+{
+  "debug" : true,
+  "experimental" : true,
+  "insecure-registries" : [
+    "127.0.0.0/16",
+    "10.152.0.0/16"
+  ]
+}
+```
+Finally, restart the docker daemon:
+
+`sudo service docker restart`
+
+To access our newly created private registry on our local machine, also add the following insecure registeries:
+
+```
+127.0.0.0/16
+10.152.0.0/16
+```
+
+This can be configured grapically in Docker for Mac:
+
+![Docker - insecure registries](./docs/dockerInsecureRegistries.png)
+
+**Test your registry:**
+
+Firstly, ensure sshuttle is running on your local machine!
+
+`sshuttle -r me@$REMOTE_EC2 10.152.0.0/16`
+
+Now on local machine do:
+```
+# list all images
+docker images
+
+# Pull latest Alpine image:
+docker pull alpine
+
+# set DOCKER_REGISTRY env var:
+export DOCKER_REGISTRY=10.152.183.58
+
+# Now, re-tag the alpine image:
+# tag image:
+docker image tag alpine $DOCKER_REGISTRY:5000/my-first-image
+
+# and push it to our private registry:
+docker push $DOCKER_REGISTRY:5000/my-first-image
+
+```
+
+Now, on remote machine, do:
+
+```
+docker images   # won't see our image yet
+
+# pull the image we just created on local:
+docker pull 10.152.183.58:5000/my-first-image
+
+docker images   # should see your image
+
+```
+
+You can now push and pull images to/from a private docker registry. Useful for setting up CI/CD pipelines while keeping data inside your private network.
