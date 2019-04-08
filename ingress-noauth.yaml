@@ -4,12 +4,12 @@ metadata:
   name: ingress-fanout-noauth
   annotations:
     # remove www prefix
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ( $host ~ ^www\.(.+)$ ) {
-        set $without_www $1;
-        rewrite ^ $scheme://$without_www$uri 302;
-      }
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    #nginx.ingress.kubernetes.io/configuration-snippet: |
+    #  if ( $host ~ ^www\.(.+)$ ) {
+    #    set $without_www $1;
+    #    rewrite ^ $scheme://$without_www$uri 302;
+    #  }
 spec:
   rules: 
   - host: rexsystems.co.uk
