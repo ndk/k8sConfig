@@ -22,9 +22,11 @@ echo " -> Renewing certificicates..."
 echo " -> Updating Kubernetes secrets..."
 ./gen-secrets.sh $CERTBOT_DOMAIN
 
+popd
+
 # restart ingress:
+pushd $thisScriptsDir
 echo " -> Restarting the ingress(es)..."
 ./ingress-restart.sh
-
 
 popd
