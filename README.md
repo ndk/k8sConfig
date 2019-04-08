@@ -618,21 +618,36 @@ Letsencrypt certificates must be renewed every 90 days. To set up automatic rene
 ```
 #!/bin/bash
 
-if (( "$#" != 1 ))
+if (( "$#" < 1 ))
 then
     echo "No domain name set. Pass a domain name and try again."
+    echo "Usage: ./gen-certs.sh domain.name [\"renew\"]"
 exit 1
 fi
 
+SHOULD_RENEW=$2
+
 export CERTBOT_DOMAIN=$1
 
-sudo certbot certonly --manual --manual-auth-hook ./certbot-hook-auth.sh --manual-cleanup-hook ./certbot-hook-cleanup.sh -d $CERTBOT_DOMAIN --manual-public-ip-logging-ok --agree-tos --keep-until-expiring #--force-renewal
+if [ "$SHOULD_RENEW" == "renew" ]; then
+        echo "...Renewing existing certificate..."
+        cmd="sudo certbot certonly --manual --manual-auth-hook ./certbot-hook-auth.sh --manual-cleanup-hook ./certbot-hook-cleanup.sh -d $CERTBOT_DOMAIN --manual-public-ip-logging-ok --agree-tos --keep-until-expiring --force-renewal"
+        echo $cmd
+        result=`$cmd`
+        echo $result
+else
+        echo "...Creating a new certificate..."
+        cmd="sudo certbot certonly --manual --manual-auth-hook ./certbot-hook-auth.sh --manual-cleanup-hook ./certbot-hook-cleanup.sh -d $CERTBOT_DOMAIN --manual-public-ip-logging-ok --agree-tos --keep-until-expiring"
+        echo $cmd
+        result=`$cmd`
+        echo $result
+fi
 ```
 
 Make it executable:
 
 ```
-chmod +x ./renew-letsencrypt.sh
+chmod +x ./gen-certs.sh
 ```
 
 And add the following cron job (root user's cron) to run it every other month:
@@ -643,12 +658,18 @@ sudo crontab -e
 ```
 # And add the following lines:
 # 03:00 on 1st of months X, Y, Z, etc.
-0 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-letsencrypt.sh rexsystems.co.uk
-1 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-letsencrypt.sh www.rexsystems.co.uk
-2 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-letsencrypt.sh nonprod.rexsystems.co.uk
-3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-letsencrypt.sh jenkins.rexsystems.co.uk
-4 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-letsencrypt.sh ideahopper.org
-5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-letsencrypt.sh nonprod.ideahopper.org
+0 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh rexsystems.co.uk
+1 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh www.rexsystems.co.uk
+2 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh nonprod.rexsystems.co.uk
+3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh jenkins.rexsystems.co.uk
+4 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh ideahopper.org
+5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh nonprod.ideahopper.org
+```
+
+, where "renew-and-restart.sh" renews the certs, updates the Kubernetes secrets objects, deletes the letsencrypt temporary ingress and restarts the ingresses:
+
+```
+
 ```
 
 ### Bonus: Add a Docker for Desktop profile
