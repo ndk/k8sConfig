@@ -18,9 +18,15 @@ spec:
         ports:
         - containerPort: 8080
         volumeMounts:
-        - mountPath: "/var/jenkins_home"
-          name: storage
+          - name: storage
+            mountPath: "/var/jenkins_home"
+          - name: ssh-jenkins-volume
+            mountPath: "/var/jenkins_home/.ssh"
       volumes:
         - name: storage
           persistentVolumeClaim:
-            claimName: pvc-jenkins 
+            claimName: pvc-jenkins
+        - name: ssh-jenkins-volume
+          secret:
+            secretName: ssh-jenkins
+
