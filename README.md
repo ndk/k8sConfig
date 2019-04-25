@@ -657,13 +657,12 @@ sudo crontab -e
 ```
 ```
 # And add the following lines:
-# 03:00 on 1st of months X, Y, Z, etc.
-0 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh rexsystems.co.uk
-1 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh www.rexsystems.co.uk
-2 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh nonprod.rexsystems.co.uk
-3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh jenkins.rexsystems.co.uk
-4 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh ideahopper.org
-5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/letsencrypt/renew-and-restart.sh nonprod.ideahopper.org
+0 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh rexsystems.co.uk
+1 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh www.rexsystems.co.uk
+2 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh nonprod.rexsystems.co.uk
+3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh jenkins.rexsystems.co.uk
+4 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh ideahopper.org
+5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh nonprod.ideahopper.org
 ```
 
 , where "renew-and-restart.sh" renews the certs, updates the Kubernetes secrets objects, deletes the letsencrypt temporary ingress and restarts the ingresses:
