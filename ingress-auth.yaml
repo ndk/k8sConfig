@@ -38,7 +38,17 @@ spec:
         backend:
           serviceName: jenkins
           servicePort: 8080
+  
+  - host: sonarqube.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: sonarqube
+          servicePort: 9000
+
   tls:
   - secretName: tls-secret-nonprod-rexsystems-co-uk
   - secretName: tls-secret-nonprod-ideahopper-org
   - secretName: tls-secret-jenkins-rexsystems-co-uk
+  - secretName: tls-secret-sonarqube-rexsystems-co-uk

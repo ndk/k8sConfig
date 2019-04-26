@@ -1,0 +1,25 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-sonarqube-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+        name: pvc-sonarqube-extensions
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
