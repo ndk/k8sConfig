@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: jenkins
-        image: jenkins/jenkins:lts
+        image: localhost:32000/jenkins-with-docker   #jenkins/jenkins:lts-alpine #10.152.183.58:5000/jenkins-with-docker #registry.container-registry.svc.cluster.local:5000/jenkins-with-docker #jenkins/jenkins:lts
         ports:
         - containerPort: 8080
         volumeMounts:
