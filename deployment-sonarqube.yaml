@@ -23,6 +23,16 @@ spec:
           mountPath: "/opt/sonarqube/data/"
         - name: sonar-extensions
           mountPath: "/opt/sonarqube/extensions/"
+        env:
+        - name: sonar.jdbc.username
+          value: sonar
+        - name: sonar.jdbc.url
+          value: jdbc:postgresql://postgres.default.svc.cluster.local/sonar
+        - name: sonar.jdbc.password
+          valueFrom:
+            secretKeyRef:
+              name: sonar-postgres-pword
+              key: SONAR_POSTGRES_PASSWORD
       volumes:
       - name: sonar-data
         persistentVolumeClaim:

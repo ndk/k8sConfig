@@ -1,0 +1,11 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-postgres
+spec:
+  accessModes:
+    - ReadWriteOnce  #the volume can be mounted as read-write by a single node
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi

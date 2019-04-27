@@ -1,0 +1,39 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        volumeMounts:
+        - name: postgres-data
+          mountPath: "/var/lib/postgresql/data/pgdata"
+        env:
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        - name: POSTGRES_DB
+          value: defaultdb
+        - name: POSTGRES_USER
+          value: hynese
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret-config
+              key: POSTGRES_PASSWORD
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: pvc-postgres
