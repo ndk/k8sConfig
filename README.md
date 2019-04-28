@@ -382,10 +382,10 @@ echo "ideahopper-PRODUCTION" >> /usr/share/nginx/html/index.html
 Our ingress doesn't connect to pods or deployments. The ingress serves services. We need to create a service for each of our two deployments (rex-prod and ideahopper-prod):
 
 ```
-microk8s.kubectl create service clusterip rexsystems-web-production -- tcp=80:80
-microk8s.kubectl create service clusterip rexsystems-api-production -- tcp=80:80
-microk8s.kubectl create service clusterip ideahopper-web-production -- tcp=80:80
-microk8s.kubectl create service clusterip ideahopper-api-production -- tcp=80:80
+microk8s.kubectl create service clusterip rexsystems-web-production --tcp=80:80
+microk8s.kubectl create service clusterip rexsystems-api-production --tcp=80:80
+microk8s.kubectl create service clusterip ideahopper-web-production --tcp=80:80
+microk8s.kubectl create service clusterip ideahopper-api-production --tcp=80:80
 
 # View the cluster IP addresses with:
 microk8s.kubectl get service
