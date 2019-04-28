@@ -26,7 +26,7 @@ My goal is to increase my operational efficiency, increase my product deployment
 ### So, what problem are we solving?
 Managed Kubernetes in the cloud can be expensive. Configuring your own microk8s Kubernetes on your own VM can be much cheaper (about 10 times cheaper in my case).
 
-If you're an indy developer or small software dev team (like me!), things can get relatively expensive. Costs can add up for a Kubernetes application with three environments (PROD, UAT and DEV). Pricing structures vary considerably across the major cloud providers but in my case, the cost of running an AWS Kubernetes cluster could easily run over $1000 a month. Check with your cloud provider for most up-to-date pricing information:
+If you're an indy developer or small software dev team (like me!), things can get relatively expensive. Costs can add up for a Kubernetes application with three environments (PRODUCTION, UAT and DEV). Pricing structures vary considerably across the major cloud providers but in my case, the cost of running an AWS Kubernetes cluster could easily run over $1000 a month. Check with your cloud provider for most up-to-date pricing information:
 
 * [Microsoft Azure AKS](https://azure.microsoft.com/en-gb/services/kubernetes-service/)
 * [Amazon Web Services EKS](https://aws.amazon.com/eks/)
@@ -38,7 +38,7 @@ The cost of running your application on a managed Kubernetes cloud can get quite
 
 But do you really need a fully managed, enterprise-grade Kubernetes cloud service for your non production apps? Sometimes even your production app may not need the 99.99% up-time provided by managed Kubernetes infrastructure. Perhaps 99% is OK for your needs? Is the expense always justified? What if you have several clients and dozens of projects? Costs can add up very quickly.
 
-I build software applications for a living and the DevOps pipeline I use for every product I build is deployed in multiple environments. Each product I'm working on is live in multiple environments. This is a common workflow and used extensively. I typically have three or four environments, depending on my clients' needs - DEV (development environment), UAT (user account testing) and PROD (production). My CI/CD pipeline (Jenkins) typically consists of:
+I build software applications for a living and the DevOps pipeline I use for every product I build is deployed in multiple environments. Each product I'm working on is live in multiple environments. This is a common workflow and used extensively. I typically have three or four environments, depending on my clients' needs - **DEV** (development environment), **UAT** (user account testing) and **PRODUCTION** (production). My CI/CD pipeline (Jenkins) typically consists of:
 
 * build application
 * test application
@@ -246,12 +246,12 @@ Before we can do anything, we must set up DNS entries. The purpose of this artic
 
 For the purposes of this article, let's assume we have two domain names we want our microk8s Kubernetes non-elastic cluster to handle:
 
-* rexsystems.co.uk (two environments - DEV and PROD)
-* ideahopper.org (three environments - DEV, UAT and PROD)
+* rexsystems.co.uk (two environments - DEV and PRODUCTION)
+* ideahopper.org (three environments - DEV, UAT and PRODUCTION)
 
 rexsystems.co.uk is my own domain and is a very simple website. If it looks good in DEV, I'm happy to put it in production.
 
-ideahopper.org is for a client and I have three environments set up there. Periodically we promote a DEV build to UAT. We send the UAT link to the client for review. If the client is happy with UAT, we can promote to PROD.
+ideahopper.org is for a client and I have three environments set up there. Periodically we promote a DEV build to UAT. We send the UAT link to the client for review. If the client is happy with UAT, we can promote to PRODUCTION.
 
 Finally, for the purposes of this tutorial, microk8s will be serving both non-production environments and production environments. Ordinarily, we'd have a separate IP (or load balancer) for non-production apps (our microk8s "cluster") and production apps (a managed Kubernetes service).
 
@@ -271,13 +271,14 @@ For this article, the ingress will support two domains:
 * rexsystems.co.uk
 * ideahopper.org
 
-rexsystems.co.uk has two environments (DEV and PROD). ideahopper.org has three environments (DEV, UAT and PROD). So, we need the ingress to support the following routes (https is not enabled just yet):
+rexsystems.co.uk has two environments (DEV and PRODUCTION). ideahopper.org has three environments (DEV, UAT and PRODUCTION). So, we need the ingress to support the following routes (https is not enabled just yet):
 
 * http://rexsystems.co.uk 
-* http://nonprod.rexsystems.co.uk/dev/ (authorization required)
+* http://nonprod.rexsystems.co.uk/web/DEV/ (authorization required)
 * http://ideahopper.org
-* http://nonprod.ideahopper.org/dev/ (authorization required)
-* http://nonprod.ideahopper.org/uat/ (authorization required)
+* http://nonprod.ideahopper.org/web/DEV/ (authorization required)
+* http://nonprod.ideahopper.org/web/UAT/ (authorization required)
+* etc.
 
 We want authorization on all nonprod environments and no authorization on all prod environments. Because of this split, we'll create two separate ingresses:
 * ingress-noauth.yaml
@@ -307,22 +308,36 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: rex-prod
+          serviceName: rexsystems-web-PRODUCTION
           servicePort: 80
+      - path: /api
+        backend:
+          serviceName: rexsystems-api-PRODUCTION
+          servicePort: 80
+
   - host: www.rexsystems.co.uk
     http:
       paths:
       - path: /
         backend:
-          serviceName: rex-prod
+          serviceName: rexsystems-web-PRODUCTION
           servicePort: 80
-   - host: ideahopper.org
-     http:
-       paths:
-       - path: /
-         backend:
-           serviceName: ideahopper-prod
-           servicePort: 80
+      - path: /api
+        backend:
+          serviceName: rexsystems-api-PRODUCTION
+          servicePort: 80
+
+  - host: ideahopper.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ideahopper-web-PRODUCTION
+          servicePort: 80
+      - path: /api
+        backend:
+          serviceName: ideahopper-api-PRODUCTION
+          servicePort: 80
 #  tls:
 #  - secretName: tls-secret-rexsystems-co-uk
 #  - secretName: tls-secret-www-rexsystems-co-uk
@@ -341,8 +356,10 @@ You first need to start two containers (rex-prod and ideahopper-prod); with each
 
 Let's spin up some bog standard nginx containers:
 ```
-microk8s.kubectl create deployment rex-prod --image=nginx
-microk8s.kubectl create deployment ideahopper-prod --image=nginx
+microk8s.kubectl create deployment rexsystems-web-PRODUCTION --image=nginx
+microk8s.kubectl create deployment rexsystems-api-PRODUCTION --image=nginx
+microk8s.kubectl create deployment ideahopper-web-PRODUCTION --image=nginx
+microk8s.kubectl create deployment ideahopper-api-PRODUCTION --image=nginx
 ```
 
 So we can identify which one is which, let's login to each pod and change the default webpage text:
@@ -353,20 +370,22 @@ microk8s.kubectl get pod
 #Login to rex-prod:
 microk8s.kubectl exec -it rex-prod______ -- /bin/bash
 #Mark the default index.html page:
-echo "rex-prod" >> /usr/share/nginx/html/index.html
+echo "rex-PRODUCTION" >> /usr/share/nginx/html/index.html
 #logout
 #Do the same for ideahopper-prod
 microk8s.kubectl exec -it ideahopper-prod______ -- /bin/bash
 #Mark the default index.html page:
-echo "ideahopper-prod" >> /usr/share/nginx/html/index.html
+echo "ideahopper-PRODUCTION" >> /usr/share/nginx/html/index.html
 #logout
 ```
 
 Our ingress doesn't connect to pods or deployments. The ingress serves services. We need to create a service for each of our two deployments (rex-prod and ideahopper-prod):
 
 ```
-microk8s.kubectl create service clusterip rex-prod -- tcp=80:80
-microk8s.kubectl create service clusterip ideahopper-prod -- tcp=80:80
+microk8s.kubectl create service clusterip rexsystems-web-PRODUCTION -- tcp=80:80
+microk8s.kubectl create service clusterip rexsystems-api-PRODUCTION -- tcp=80:80
+microk8s.kubectl create service clusterip ideahopper-web-PRODUCTION -- tcp=80:80
+microk8s.kubectl create service clusterip ideahopper-api-PRODUCTION -- tcp=80:80
 
 # View the cluster IP addresses with:
 microk8s.kubectl get service
@@ -404,20 +423,41 @@ spec:
   - host: nonprod.rexsystems.co.uk
     http:
       paths:
-      - path: /dev/
+      - path: /web/DEV/
         backend:
-          serviceName: rex-dev
+          serviceName: rexsystems-web-DEV
           servicePort: 80
-- host: nonprod.ideahopper.org
+      - path: /api/DEV/
+        backend:
+          serviceName: rexsystems-api-DEV
+          servicePort: 80
+
+  - host: nonprod.ideahopper.org
     http:
       paths:
-      - path: /dev/
+      - path: /web/DEV/
         backend:
-          serviceName: ideahopper-dev
+          serviceName: ideahopper-web-DEV
           servicePort: 80
-      - path: /uat/
+      - path: /api/DEV
         backend:
-          serviceName: ideahopper-uat
+          serviceName: ideahopper-api-DEV
+          servicePort: 80
+      - path: /web/UAT/
+        backend:
+          serviceName: ideahopper-web-UAT
+          servicePort: 80
+      - path: /api/UAT/
+        backend:
+          serviceName: ideahopper-api-UAT
+          servicePort: 80
+      - path: /web/STAGING/
+        backend:
+          serviceName: ideahopper-web-STAGING
+          servicePort: 80
+      - path: /api/STAGING/
+        backend:
+          serviceName: ideahopper-api-STAGING
           servicePort: 80
 #  tls:
 #  - secretName: tls-secret-nonprod-rexsystems-co-uk
@@ -428,8 +468,8 @@ Again, the last three lines are commented out - I'll show you how to enable 
 
 I've configured the ingress to route two non-production domain names serving three environments:
 
-* http://nonprod.rexsystems.co.uk/dev
-* http://nonprod.ideahopper.org/dev and http://nonprod.ideahopper.org/uat
+* http://nonprod.rexsystems.co.uk/web/DEV
+* http://nonprod.ideahopper.org/web/DEV and http://nonprod.ideahopper.org/web/UAT
 
 It **won't work** if you try to start the ingress with:
 ```
@@ -513,6 +553,16 @@ Voila!
 ### Signed certificates using letsencrypt
 
 Yeah, but I want signed certificates. I haven't got time to be continually having the same conversation repeatedly with multiple clients.
+
+#### Quick-start:
+
+You have a new domain called "acme.org"
+
+`./renew-and-restart.sh acme.org`
+
+Boom. cert generated and k8s secret created.
+
+#### Details:
 
 You can generate a certificate signing request (CSR) based off your private key and send your CSR to a trusted certificate authority (e.g. [Thawtes](https://thawtes.com), [GoDaddy](https://godaddy.com)) for signing. You can then use the resulting certificate the certificate authority provides to create a new Kubernetes secret object for your domain. But I have dozens of domains and dozens of clients... The overheads (dollars and administration) associated with paying a certificate authority $100 a year quickly add up.
 
