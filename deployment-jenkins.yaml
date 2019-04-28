@@ -29,6 +29,8 @@ spec:
             # Note: it is very important to adjust the container docker's gid to be the same as the host docker gid
           - name: docker-sock-volume
             mountPath: /var/run/docker.sock
+          - name: kube-config
+            mountPath: ~/.kube/config
       volumes:
         - name: storage
           persistentVolumeClaim:
@@ -40,4 +42,7 @@ spec:
           hostPath:
             path: /var/run/docker.sock
             type: File
-
+        - name: kube-config
+          hostPath:
+            path: /home/ehynes/.kube/config.jenkins
+            type: File
