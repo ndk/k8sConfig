@@ -14,23 +14,55 @@ spec:
   - host: nonprod.rexsystems.co.uk
     http:
       paths:
-      - path: /dev/
+      - path: /web/dev/
         backend:
-          serviceName: rex-dev
+          serviceName: rexsystems-web-dev
+          servicePort: 80
+      - path: /api/dev/
+        backend:
+          serviceName: rexsystems-api-dev
+          servicePort: 80
+
+  - host: nonprod.rexapp.rexsystems.co.uk
+    http:
+      paths:
+      - path: /web/dev/
+        backend:
+          serviceName: rexapp-web-dev
+          servicePort: 80
+      - path: /api/dev/
+        backend:
+          serviceName: rexapp-api-dev
           servicePort: 80
 
   - host: nonprod.ideahopper.org
     http:
       paths:
-      - path: /dev/
+      - path: /web/dev/
         backend:
-          serviceName: ideahopper-dev
+          serviceName: ideahopper-web-dev
           servicePort: 80
-      - path: /uat/
+      - path: /api/dev
         backend:
-          serviceName: ideahopper-uat
+          serviceName: ideahopper-api-dev
           servicePort: 80
- 
+      - path: /web/uat/
+        backend:
+          serviceName: ideahopper-web-uat
+          servicePort: 80
+      - path: /api/uat/
+        backend:
+          serviceName: ideahopper-api-uat
+          servicePort: 80
+      - path: /web/staging/
+        backend:
+          serviceName: ideahopper-web-staging
+          servicePort: 80
+      - path: /api/staging/
+        backend:
+          serviceName: ideahopper-api-staging
+          servicePort: 80
+
   - host: jenkins.rexsystems.co.uk
     http:
       paths:
@@ -38,7 +70,7 @@ spec:
         backend:
           serviceName: jenkins
           servicePort: 8080
-  
+
   - host: sonarqube.rexsystems.co.uk
     http:
       paths:
@@ -46,7 +78,6 @@ spec:
         backend:
           serviceName: sonarqube
           servicePort: 9000
-
   - host: artifactory.rexsystems.co.uk
     http:
       paths:
@@ -57,6 +88,7 @@ spec:
 
   tls:
   - secretName: tls-secret-nonprod-rexsystems-co-uk
+  - secretName: tls-secret-nonprod-rexapp-rexsystems-co-uk
   - secretName: tls-secret-nonprod-ideahopper-org
   - secretName: tls-secret-jenkins-rexsystems-co-uk
   - secretName: tls-secret-sonarqube-rexsystems-co-uk

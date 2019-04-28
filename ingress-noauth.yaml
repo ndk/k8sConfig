@@ -11,13 +11,17 @@ metadata:
     #    rewrite ^ $scheme://$without_www$uri 302;
     #  }
 spec:
-  rules: 
+  rules:
   - host: rexsystems.co.uk
     http:
       paths:
       - path: /
         backend:
-          serviceName: rex-prod
+          serviceName: rexsystems-web-production
+          servicePort: 80
+      - path: /api
+        backend:
+          serviceName: rexsystems-api-production
           servicePort: 80
 
   - host: www.rexsystems.co.uk
@@ -25,7 +29,23 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: rex-prod
+          serviceName: rexsystems-web-production
+          servicePort: 80
+      - path: /api
+        backend:
+          serviceName: rexsystems-api-production
+          servicePort: 80
+  
+  - host: rexapp.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: rexapp-web-production
+          servicePort: 80
+      - path: /api
+        backend:
+          serviceName: rexapp-api-production
           servicePort: 80
 
   - host: ideahopper.org
@@ -33,10 +53,14 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: ideahopper-prod
+          serviceName: ideahopper-web-production
           servicePort: 80
-
+      - path: /api
+        backend:
+          serviceName: ideahopper-api-production
+          servicePort: 80
   tls:
     - secretName: tls-secret-rexsystems-co-uk
     - secretName: tls-secret-www-rexsystems-co-uk
+    - secretName: tls-secret-rexapp-rexsystems-co-uk
     - secretName: tls-secret-ideahopper-org
