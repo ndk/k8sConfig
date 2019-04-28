@@ -25,6 +25,7 @@ RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debia
 RUN cat /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y docker-ce docker-ce-cli
+RUN usermod -aG docker jenkins
 
 #RUN apt-get remove -y  docker docker.io runc
 #RUN apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
