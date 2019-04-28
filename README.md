@@ -274,10 +274,10 @@ For this article, the ingress will support two domains:
 rexsystems.co.uk has two environments (DEV and PRODUCTION). ideahopper.org has three environments (DEV, UAT and PRODUCTION). So, we need the ingress to support the following routes (https is not enabled just yet):
 
 * http://rexsystems.co.uk 
-* http://nonprod.rexsystems.co.uk/web/DEV/ (authorization required)
+* http://nonprod.rexsystems.co.uk/web/dev/ (authorization required)
 * http://ideahopper.org
-* http://nonprod.ideahopper.org/web/DEV/ (authorization required)
-* http://nonprod.ideahopper.org/web/UAT/ (authorization required)
+* http://nonprod.ideahopper.org/web/dev/ (authorization required)
+* http://nonprod.ideahopper.org/web/uat/ (authorization required)
 * etc.
 
 We want authorization on all nonprod environments and no authorization on all prod environments. Because of this split, we'll create two separate ingresses:
@@ -286,7 +286,7 @@ We want authorization on all nonprod environments and no authorization on all pr
 
 Because my authentication and authorization requirements are very simple (at the moment), I'll be using Basic Authentication which is supported by Kubernetes.
 
-Here is an ingress for PROD endpoints (i.e. no authorization) called "ingress-noauth.yaml":
+Here is an ingress for PRODUCTION endpoints (i.e. no authorization) called "ingress-noauth.yaml":
 
 ```
 apiVersion: extensions/v1beta1
@@ -308,11 +308,11 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: rexsystems-web-PRODUCTION
+          serviceName: rexsystems-web-production
           servicePort: 80
       - path: /api
         backend:
-          serviceName: rexsystems-api-PRODUCTION
+          serviceName: rexsystems-api-production
           servicePort: 80
 
   - host: www.rexsystems.co.uk
@@ -320,11 +320,11 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: rexsystems-web-PRODUCTION
+          serviceName: rexsystems-web-production
           servicePort: 80
       - path: /api
         backend:
-          serviceName: rexsystems-api-PRODUCTION
+          serviceName: rexsystems-api-production
           servicePort: 80
 
   - host: ideahopper.org
@@ -332,11 +332,11 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: ideahopper-web-PRODUCTION
+          serviceName: ideahopper-web-production
           servicePort: 80
       - path: /api
         backend:
-          serviceName: ideahopper-api-PRODUCTION
+          serviceName: ideahopper-api-production
           servicePort: 80
 #  tls:
 #  - secretName: tls-secret-rexsystems-co-uk
@@ -356,10 +356,10 @@ You first need to start two containers (rex-prod and ideahopper-prod); with each
 
 Let's spin up some bog standard nginx containers:
 ```
-microk8s.kubectl create deployment rexsystems-web-PRODUCTION --image=nginx
-microk8s.kubectl create deployment rexsystems-api-PRODUCTION --image=nginx
-microk8s.kubectl create deployment ideahopper-web-PRODUCTION --image=nginx
-microk8s.kubectl create deployment ideahopper-api-PRODUCTION --image=nginx
+microk8s.kubectl create deployment rexsystems-web-production --image=nginx
+microk8s.kubectl create deployment rexsystems-api-production --image=nginx
+microk8s.kubectl create deployment ideahopper-web-production --image=nginx
+microk8s.kubectl create deployment ideahopper-api-production --image=nginx
 ```
 
 So we can identify which one is which, let's login to each pod and change the default webpage text:
@@ -382,10 +382,10 @@ echo "ideahopper-PRODUCTION" >> /usr/share/nginx/html/index.html
 Our ingress doesn't connect to pods or deployments. The ingress serves services. We need to create a service for each of our two deployments (rex-prod and ideahopper-prod):
 
 ```
-microk8s.kubectl create service clusterip rexsystems-web-PRODUCTION -- tcp=80:80
-microk8s.kubectl create service clusterip rexsystems-api-PRODUCTION -- tcp=80:80
-microk8s.kubectl create service clusterip ideahopper-web-PRODUCTION -- tcp=80:80
-microk8s.kubectl create service clusterip ideahopper-api-PRODUCTION -- tcp=80:80
+microk8s.kubectl create service clusterip rexsystems-web-production -- tcp=80:80
+microk8s.kubectl create service clusterip rexsystems-api-production -- tcp=80:80
+microk8s.kubectl create service clusterip ideahopper-web-production -- tcp=80:80
+microk8s.kubectl create service clusterip ideahopper-api-production -- tcp=80:80
 
 # View the cluster IP addresses with:
 microk8s.kubectl get service
@@ -423,41 +423,41 @@ spec:
   - host: nonprod.rexsystems.co.uk
     http:
       paths:
-      - path: /web/DEV/
+      - path: /web/dev/
         backend:
-          serviceName: rexsystems-web-DEV
+          serviceName: rexsystems-web-dev
           servicePort: 80
-      - path: /api/DEV/
+      - path: /api/dev/
         backend:
-          serviceName: rexsystems-api-DEV
+          serviceName: rexsystems-api-dev
           servicePort: 80
 
   - host: nonprod.ideahopper.org
     http:
       paths:
-      - path: /web/DEV/
+      - path: /web/dev/
         backend:
-          serviceName: ideahopper-web-DEV
+          serviceName: ideahopper-web-dev
           servicePort: 80
-      - path: /api/DEV
+      - path: /api/dev
         backend:
-          serviceName: ideahopper-api-DEV
+          serviceName: ideahopper-api-dev
           servicePort: 80
-      - path: /web/UAT/
+      - path: /web/uat/
         backend:
-          serviceName: ideahopper-web-UAT
+          serviceName: ideahopper-web-uat
           servicePort: 80
-      - path: /api/UAT/
+      - path: /api/uat/
         backend:
-          serviceName: ideahopper-api-UAT
+          serviceName: ideahopper-api-uat
           servicePort: 80
-      - path: /web/STAGING/
+      - path: /web/staging/
         backend:
-          serviceName: ideahopper-web-STAGING
+          serviceName: ideahopper-web-staging
           servicePort: 80
-      - path: /api/STAGING/
+      - path: /api/staging/
         backend:
-          serviceName: ideahopper-api-STAGING
+          serviceName: ideahopper-api-staging
           servicePort: 80
 #  tls:
 #  - secretName: tls-secret-nonprod-rexsystems-co-uk
@@ -468,8 +468,8 @@ Again, the last three lines are commented out - I'll show you how to enable 
 
 I've configured the ingress to route two non-production domain names serving three environments:
 
-* http://nonprod.rexsystems.co.uk/web/DEV
-* http://nonprod.ideahopper.org/web/DEV and http://nonprod.ideahopper.org/web/UAT
+* http://nonprod.rexsystems.co.uk/web/dev
+* http://nonprod.ideahopper.org/web/dev and http://nonprod.ideahopper.org/web/uat
 
 It **won't work** if you try to start the ingress with:
 ```
