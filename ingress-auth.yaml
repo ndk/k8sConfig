@@ -47,8 +47,17 @@ spec:
           serviceName: sonarqube
           servicePort: 9000
 
+  - host: artifactory.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: artifactory
+          servicePort: 80
+
   tls:
   - secretName: tls-secret-nonprod-rexsystems-co-uk
   - secretName: tls-secret-nonprod-ideahopper-org
   - secretName: tls-secret-jenkins-rexsystems-co-uk
   - secretName: tls-secret-sonarqube-rexsystems-co-uk
+  - secretName: tls-secret-artifactory-rexsystems-co-uk
