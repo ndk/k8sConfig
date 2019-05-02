@@ -258,9 +258,15 @@ Finally, for the purposes of this tutorial, microk8s will be serving both non-pr
 Here are the required DNS records:
 
 * **A record**: rexsystems.co.uk - 99.80.128.68
-* **A record**: nonprod.rexsystems.co.uk - 99.80.128.68
 * **A record**: ideahopper.org - 99.80.128.68
-* **A record**: nonprod.ideahopper.org - 99.80.128.68
+* **A record**: dev.web.0001.rexsystems.co.uk - 99.80.128.68
+* **A record**: dev.api.0001.rexsystems.co.uk - 99.80.128.68
+* **A record**: dev.web.0002.rexsystems.co.uk - 99.80.128.68
+* **A record**: dev.api.0002.rexsystems.co.uk - 99.80.128.68
+* **A record**: uat.web.0002.rexsystems.co.uk - 99.80.128.68
+* **A record**: uat.api.0002.rexsystems.co.uk - 99.80.128.68
+* **A record**: staging.web.0002.rexsystems.co.uk - 99.80.128.68
+* **A record**: staging.api.0002.rexsystems.co.uk - 99.80.128.68
 
 When using production infrastructure, simply update the DNS records.
 
@@ -273,11 +279,12 @@ For this article, the ingress will support two domains:
 
 rexsystems.co.uk has two environments (DEV and PRODUCTION). ideahopper.org has three environments (DEV, UAT and PRODUCTION). So, we need the ingress to support the following routes (https is not enabled just yet):
 
-* http://rexsystems.co.uk 
-* http://nonprod.rexsystems.co.uk/web/dev/ (authorization required)
+* http://rexsystems.co.uk
 * http://ideahopper.org
-* http://nonprod.ideahopper.org/web/dev/ (authorization required)
-* http://nonprod.ideahopper.org/web/uat/ (authorization required)
+* http://dev.web.0001.rexsystems.co.uk (authorization required)
+* http://dev.api.0001.rexsystems.co.uk (authorization required)
+* http://dev.web.0002.rexsystems.co.uk (authorization required)
+* http://dev.api.0002.rexsystems.co.uk (authorization required)
 * etc.
 
 We want authorization on all nonprod environments and no authorization on all prod environments. Because of this split, we'll create two separate ingresses:
@@ -405,6 +412,18 @@ Voila!
 
 We don't want to allow public access to non-production environments. So placing a username and password on all non-production endpoints makes sense. I use Basic http Authorization in this setup. There are more advanced authorization and authentication mechanisms available, but these are overkill for my needs. **Note: I highly recommend not using Basic Authorization without SSL/https enabled. Using Basic Authorization over http transmits your username/password pair in the clear. Make sure you know what you are doing**.
 
+***
+Note: I previously attempted to set up my ingres to allow routing such as:
+- http://nonprod.rexapp.rexsystems.co.uk/web/api
+- http://nonprod.ideahopper.rexsystems.co.uk/web/api
+- etc.
+
+Three issues here:
+1. Routing (e.g. API traffic routing) should be done in Kubernetes (not web app). Avail of high performance load balancers, etc.
+2. DNS leaking. Use code names instead of your product's full domain name.
+3. React/front-end configuration. Preferable to KISS
+***
+
 Here is a Kubernetes ingress with basic authorization:
 
 ```
@@ -417,59 +436,143 @@ metadata:
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: htsecret
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
-nginx.ingress.kubernetes.io/rewrite-target: /
+
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: nonprod.rexsystems.co.uk
+
+  #rexapp (0001)
+  - host: dev.web.0001.rexsystems.co.uk
     http:
       paths:
-      - path: /web/dev/
+      - path: /
         backend:
-          serviceName: rexsystems-web-dev
+          serviceName: rexapp-web-dev
           servicePort: 80
-      - path: /api/dev/
+      - path: /api
         backend:
-          serviceName: rexsystems-api-dev
+          serviceName: rexapp-api-dev
+          servicePort: 80
+  - host: dev.api.0001.rexsystems.co.uk
+      - path: /
+        backend:
+          serviceName: rexapp-api-dev
           servicePort: 80
 
-  - host: nonprod.ideahopper.org
+  #ideahopper (0002)
+  - host: dev.web.0002.rexsystems.co.uk
     http:
       paths:
-      - path: /web/dev/
+      - path: /
         backend:
           serviceName: ideahopper-web-dev
           servicePort: 80
-      - path: /api/dev
+      - path: /api
         backend:
           serviceName: ideahopper-api-dev
           servicePort: 80
-      - path: /web/uat/
+  - host: dev.api.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ideahopper-api-dev
+          servicePort: 80
+  - host: uat.web.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
         backend:
           serviceName: ideahopper-web-uat
           servicePort: 80
-      - path: /api/uat/
+      - path: /api
         backend:
           serviceName: ideahopper-api-uat
           servicePort: 80
-      - path: /web/staging/
+  - host: uat.api.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ideahopper-api-uat
+          servicePort: 80
+  - host: staging.web.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
         backend:
           serviceName: ideahopper-web-staging
           servicePort: 80
-      - path: /api/staging/
+      - path: /api
         backend:
           serviceName: ideahopper-api-staging
           servicePort: 80
+  - host: staging.api.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ideahopper-api-staging
+          servicePort: 80
+
+
+  #jenkins
+  - host: jenkins.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: jenkins
+          servicePort: 8080
+
+  #sonarqube
+  - host: sonarqube.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: sonarqube
+          servicePort: 9000
+
+  #artifactory
+  - host: artifactory.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: artifactory
+          servicePort: 80
+
+
 #  tls:
-#  - secretName: tls-secret-nonprod-rexsystems-co-uk
-#  - secretName: tls-secret-nonprod-ideahopper-org
+#  - secretName: tls-secret-dev-web-0000-rexsystems-co-uk
+#  - secretName: tls-secret-dev-api-0000-rexsystems-co-uk
+#  - secretName: tls-secret-dev-web-0001-rexsystems-co-uk
+#  - secretName: tls-secret-dev-api-0001-rexsystems-co-uk
+#  - secretName: tls-secret-dev-web-0002-rexsystems-co-uk
+#  - secretName: tls-secret-dev-api-0002-rexsystems-co-uk
+#  - secretName: tls-secret-uat-web-0002-rexsystems-co-uk
+#  - secretName: tls-secret-uat-api-0002-rexsystems-co-uk
+#  - secretName: tls-secret-staging-web-0002-rexsystems-co-uk
+#  - secretName: tls-secret-staging-api-0002-rexsystems-co-uk
+#  - secretName: tls-secret-jenkins-rexsystems-co-uk
+#  - secretName: tls-secret-sonarqube-rexsystems-co-uk
+#  - secretName: tls-secret-artifactory-rexsystems-co-uk
+
 ```
 
-Again, the last three lines are commented out - I'll show you how to enable SSL in the next section.
+Again, the last few lines are commented out - I'll show you how to enable SSL in the next section.
 
-I've configured the ingress to route two non-production domain names serving three environments:
+I've configured the ingress to route two non-production domain names serving the following environments:
 
-* http://nonprod.rexsystems.co.uk/web/dev
-* http://nonprod.ideahopper.org/web/dev and http://nonprod.ideahopper.org/web/uat
+* http://dev.web.0001.rexsystems.co.uk
+* http://dev.api.0001.rexsystems.co.uk
+* http://dev.web.0002.rexsystems.co.uk
+* http://dev.api.0002.rexsystems.co.uk
+* http://uat.web.0002.rexsystems.co.uk
+* http://uat.api.0002.rexsystems.co.uk
+* http://staging.web.0002.rexsystems.co.uk
+* http://staging.api.0002.rexsystems.co.uk
 
 It **won't work** if you try to start the ingress with:
 ```
@@ -500,7 +603,7 @@ microk8s.kubectl create -f ingress-auth.yaml
 microk8s.kubectl get all --all-namespaces
 ```
 
-Navigate to http://nonprod.rexsystems.co.uk/dev/ and you should be prompted to enter your password. On successful password authorization, you will see your nginx default homepage.
+Navigate to http://http://dev.web.0001.rexsystems.co.uk and you should be prompted to enter your password. On successful password authorization, you will see your nginx default homepage.
 
 Voila!
 
@@ -517,19 +620,53 @@ mkdir ssl
 cd ssl
 # Generate a private key:
 openssl genrsa -out private.key 2048
+
 # Optional step - generate a CSR to get signed certs:
 #Generate a .csr (certificate signing request) - we'll use this later
 openssl req -new -key private.key -out server.csr​
+
 # And the cert for each of your FQDNs:
 openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[rexsystems.co.uk]" > rexsystems.co.uk.crt
-openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[nonprod.rexsystems.co.uk]" > nonprod.rexsystems.co.uk.crt
+
 openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[ideahopper.org]" > ideahopper.org.crt
-openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[nonprod.ideahopper.org]" > nonprod.ideahopper.org.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[dev.web.0001.rexsystems.co.uk]" > dev.web.0001.rexsystems.co.uk.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[dev.api.0001.rexsystems.co.uk]" > dev.api.0001.rexsystems.co.uk.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[dev.web.0002.rexsystems.co.uk]" > dev.web.0002.rexsystems.co.uk.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[dev.api.0002.rexsystems.co.uk]" > dev.api.0002.rexsystems.co.uk.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[uat.web.0002.rexsystems.co.uk]" > uat.web.0002.rexsystems.co.uk.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[uat.api.0002.rexsystems.co.uk]" > uat.api.0002.rexsystems.co.uk.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[staging.web.0002.rexsystems.co.uk]" > staging.web.0002.rexsystems.co.uk.crt
+
+openssl req -new -x509 -nodes -sha256 -days 3650 -key private.key -subj "/CN=[staging.api.0002.rexsystems.co.uk]" > staging.api.0002.rexsystems.co.uk.crt
+
 # Now create your TLS secrets with:
 microk8s.kubectl create secret tls tls-secret-rexsystems-co-uk --cert ./rexsystems.co.uk.crt --key ./private.key
-microk8s.kubectl create secret tls tls-secret-nonprod-rexsystems-co-uk --cert ./nonprod.rexsystems.co.uk.crt --key ./private.key
+
 microk8s.kubectl create secret tls tls-secret-ideahopper-org --cert ./ideahopper.org.crt --key ./private.key
-microk8s.kubectl create secret tls tls-secret-nonprod-ideahopper-org --cert ./nonprod.ideahopper.org.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-dev-web-0001-rexsystems-co-uk --cert ./dev.web.0001.rexsystems.co.uk.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-dev-api-0001-rexsystems-co-uk --cert ./dev.api.0001.rexsystems.co.uk.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-dev-web-0002-rexsystems-co-uk --cert ./dev.web.0002.rexsystems.co.uk.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-dev-api-0002-rexsystems-co-uk --cert ./dev.api.0002.rexsystems.co.uk.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-uat-web-0002-rexsystems-co-uk --cert ./uat.web.0002.rexsystems.co.uk.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-uat-api-0002-rexsystems-co-uk --cert ./uat.api.0002.rexsystems.co.uk.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-staging-web-0002-rexsystems-co-uk --cert ./staging.web.0002.rexsystems.co.uk.crt --key ./private.key
+
+microk8s.kubectl create secret tls tls-secret-staging-api-0002-rexsystems-co-uk --cert ./staging.api.0002.rexsystems.co.uk.crt --key ./private.key
+
 # View all the secrets your just created with:
 microk8s.kubectl get secret
 ```
@@ -709,10 +846,11 @@ sudo crontab -e
 # And add the following lines:
 0 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh rexsystems.co.uk
 1 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh www.rexsystems.co.uk
-2 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh nonprod.rexsystems.co.uk
-3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh jenkins.rexsystems.co.uk
 4 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh ideahopper.org
-5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh nonprod.ideahopper.org
+2 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0001.rexsystems.co.uk
+3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0001.rexsystems.co.uk
+5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0002.rexsystems.co.uk
+6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0002.rexsystems.co.uk
 ```
 
 , where "renew-and-restart.sh" renews the certs, updates the Kubernetes secrets objects, deletes the letsencrypt temporary ingress and restarts the ingresses:
