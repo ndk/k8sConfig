@@ -7,62 +7,109 @@ metadata:
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: htsecret
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
-    
+
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: nonprod.rexsystems.co.uk
+
+
+  #rexsystems (0000)
+  - host: dev.web.0000.rexsystems.co.uk
     http:
       paths:
-      - path: /web/dev/
+      - path: /
         backend:
           serviceName: rexsystems-web-dev
           servicePort: 80
-      - path: /api/dev/
+      - path: /api
+        backend:
+          serviceName: rexsystems-api-dev
+          servicePort: 80
+  - host: dev.api.0000.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
         backend:
           serviceName: rexsystems-api-dev
           servicePort: 80
 
-  - host: nonprod.rexapp.rexsystems.co.uk
+
+  #rexapp (0001)
+  - host: dev.web.0001.rexsystems.co.uk
     http:
       paths:
-      - path: /web/dev/
+      - path: /
         backend:
           serviceName: rexapp-web-dev
           servicePort: 80
-      - path: /api/dev/
+      - path: /api
+        backend:
+          serviceName: rexapp-api-dev
+          servicePort: 80
+  - host: dev.api.0001.rexsystems.co.uk
+      - path: /
         backend:
           serviceName: rexapp-api-dev
           servicePort: 80
 
-  - host: nonprod.ideahopper.org
+  #ideahopper (0002)
+  - host: dev.web.0002.rexsystems.co.uk
     http:
       paths:
-      - path: /web/dev/
+      - path: /
         backend:
           serviceName: ideahopper-web-dev
           servicePort: 80
-      - path: /api/dev
+      - path: /api
         backend:
           serviceName: ideahopper-api-dev
           servicePort: 80
-      - path: /web/uat/
+  - host: dev.api.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ideahopper-api-dev
+          servicePort: 80
+  - host: uat.web.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
         backend:
           serviceName: ideahopper-web-uat
           servicePort: 80
-      - path: /api/uat/
+      - path: /api
         backend:
           serviceName: ideahopper-api-uat
           servicePort: 80
-      - path: /web/staging/
+  - host: uat.api.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ideahopper-api-uat
+          servicePort: 80
+  - host: staging.web.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
         backend:
           serviceName: ideahopper-web-staging
           servicePort: 80
-      - path: /api/staging/
+      - path: /api
+        backend:
+          serviceName: ideahopper-api-staging
+          servicePort: 80
+  - host: staging.api.0002.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
         backend:
           serviceName: ideahopper-api-staging
           servicePort: 80
 
+
+  #jenkins
   - host: jenkins.rexsystems.co.uk
     http:
       paths:
@@ -71,6 +118,7 @@ spec:
           serviceName: jenkins
           servicePort: 8080
 
+  #sonarqube
   - host: sonarqube.rexsystems.co.uk
     http:
       paths:
@@ -78,6 +126,8 @@ spec:
         backend:
           serviceName: sonarqube
           servicePort: 9000
+
+  #artifactory
   - host: artifactory.rexsystems.co.uk
     http:
       paths:
@@ -86,10 +136,18 @@ spec:
           serviceName: artifactory
           servicePort: 80
 
+
   tls:
-  - secretName: tls-secret-nonprod-rexsystems-co-uk
-  - secretName: tls-secret-nonprod-rexapp-rexsystems-co-uk
-  - secretName: tls-secret-nonprod-ideahopper-org
+  - secretName: tls-secret-dev-web-0000-rexsystems-co-uk
+  - secretName: tls-secret-dev-api-0000-rexsystems-co-uk
+  - secretName: tls-secret-dev-web-0001-rexsystems-co-uk
+  - secretName: tls-secret-dev-api-0001-rexsystems-co-uk
+  - secretName: tls-secret-dev-web-0002-rexsystems-co-uk
+  - secretName: tls-secret-dev-api-0002-rexsystems-co-uk
+  - secretName: tls-secret-uat-web-0002-rexsystems-co-uk
+  - secretName: tls-secret-uat-api-0002-rexsystems-co-uk
+  - secretName: tls-secret-staging-web-0002-rexsystems-co-uk
+  - secretName: tls-secret-staging-api-0002-rexsystems-co-uk
   - secretName: tls-secret-jenkins-rexsystems-co-uk
   - secretName: tls-secret-sonarqube-rexsystems-co-uk
   - secretName: tls-secret-artifactory-rexsystems-co-uk
