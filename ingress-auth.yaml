@@ -12,7 +12,6 @@ metadata:
 spec:
   rules:
 
-
   #rexsystems (0000)
   - host: dev.web.0000.rexsystems.co.uk
     http:
@@ -47,6 +46,8 @@ spec:
           serviceName: rexapp-api-dev
           servicePort: 80
   - host: dev.api.0001.rexsystems.co.uk
+    http:
+      paths:
       - path: /
         backend:
           serviceName: rexapp-api-dev

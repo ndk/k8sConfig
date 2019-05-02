@@ -851,6 +851,10 @@ sudo crontab -e
 3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0001.rexsystems.co.uk
 5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0002.rexsystems.co.uk
 6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0002.rexsystems.co.uk
+6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh uat.web.0002.rexsystems.co.uk
+6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh uat.api.0002.rexsystems.co.uk
+6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh staging.web.0002.rexsystems.co.uk
+6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh staging.api.0002.rexsystems.co.uk
 ```
 
 , where "renew-and-restart.sh" renews the certs, updates the Kubernetes secrets objects, deletes the letsencrypt temporary ingress and restarts the ingresses:
