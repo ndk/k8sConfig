@@ -9,6 +9,9 @@ fi
 
 export CERTBOT_DOMAIN=$1
 
+# Stop ingresses!
+./ingress-restart.sh stop
+
 # get this script's directory (works on Linux, OSX, etc.)
 # See: https://stackoverflow.com/a/17744637
 thisScriptsDir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
