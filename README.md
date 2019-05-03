@@ -695,7 +695,10 @@ Yeah, but I want signed certificates. I haven't got time to be continually havin
 
 You have a new domain called "acme.org"
 
-`./renew-and-restart.sh acme.org`
+```
+unset CERTBOT_DOMAIN
+./renew-and-restart.sh acme.org
+```
 
 Boom. cert generated and k8s secret created.
 
