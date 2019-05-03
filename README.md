@@ -844,17 +844,18 @@ sudo crontab -e
 ```
 ```
 # And add the following lines:
-0 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh rexsystems.co.uk
-1 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh www.rexsystems.co.uk
-4 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh ideahopper.org
-2 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0001.rexsystems.co.uk
-3 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0001.rexsystems.co.uk
-5 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0002.rexsystems.co.uk
-6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0002.rexsystems.co.uk
-6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh uat.web.0002.rexsystems.co.uk
-6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh uat.api.0002.rexsystems.co.uk
-6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh staging.web.0002.rexsystems.co.uk
-6 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh staging.api.0002.rexsystems.co.uk
+00 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh rexsystems.co.uk
+02 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh www.rexsystems.co.uk
+04 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh jenkins.rexsystems.co.uk
+10 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh ideahopper.org
+16 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0001.rexsystems.co.uk
+18 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0001.rexsystems.co.uk
+20 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0002.rexsystems.co.uk
+22 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0002.rexsystems.co.uk
+24 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh uat.web.0002.rexsystems.co.uk
+26 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh uat.api.0002.rexsystems.co.uk
+28 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh staging.web.0002.rexsystems.co.uk
+30 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh staging.api.0002.rexsystems.co.uk
 ```
 
 , where "renew-and-restart.sh" renews the certs, updates the Kubernetes secrets objects, deletes the letsencrypt temporary ingress and restarts the ingresses:
