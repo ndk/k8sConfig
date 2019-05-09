@@ -23,8 +23,9 @@ spec:
         volumeMounts:
           - name: storage
             mountPath: "/var/jenkins_home"
-          - name: ssh-jenkins-volume
-            mountPath: "/var/jenkins_home/.ssh"
+            #- name: ssh-jenkins-volume
+            #mountPath: "/var/jenkins_home/.ssh"
+            
             # `docker` inside Docker won't work! Pass up to the host's docker :)
             # Note: it is very important to adjust the container docker's gid to be the same as the host docker gid
           - name: docker-sock-volume
@@ -35,9 +36,9 @@ spec:
         - name: storage
           persistentVolumeClaim:
             claimName: pvc-jenkins
-        - name: ssh-jenkins-volume
-          secret:
-            secretName: ssh-jenkins
+            #- name: ssh-jenkins-volume
+            #secret:
+            #secretName: ssh-jenkins
         - name: docker-sock-volume
           hostPath:
             path: /var/run/docker.sock
