@@ -1,0 +1,27 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-elasticsearch-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 3Gi
+
+# ---
+#
+# We don't need this! Kibana stores its config in elasticsearch! :) :) :)
+#
+# kind: PersistentVolumeClaim
+# apiVersion: v1
+# metadata:
+#         name: pvc-kibana-data
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   volumeMode: Filesystem
+#   resources:
+#     requests:
+#       storage: 1Gi

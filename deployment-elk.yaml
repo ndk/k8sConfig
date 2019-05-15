@@ -1,0 +1,74 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:7.0.1
+        ports:
+        - containerPort: 9200
+          protocol: TCP
+        - containerPort: 9300
+          protocol: TCP
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: "/usr/share/elasticsearch/data/"
+        #- name: sonar-extensions
+        #  mountPath: "/opt/sonarqube/extensions/"
+        env:
+        - name: discovery.type
+          value: single-node
+        #- name: sonar.jdbc.url
+        #  value: jdbc:postgresql://postgres.default.svc.cluster.local/sonar
+        #- name: sonar.jdbc.password
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: sonar-postgres-pword
+        #      key: SONAR_POSTGRES_PASSWORD
+      volumes:
+      - name: elasticsearch-data
+        persistentVolumeClaim:
+          claimName: pvc-elasticsearch-data
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: kibana:7.0.1
+        ports:
+        - containerPort: 5601
+          protocol: TCP
+        #volumeMounts:   # don't need this! :) Stored in elastic search!!! :)
+        #- name: kibana-data
+        #  mountPath: "/usr/share/kibana/data/"
+        env:
+        - name: ELASTICSEARCH_URL
+          value: http://elasticsearch.default.svc.cluster.local:9200
+      #volumes:
+      #- name: kibana-data
+      #  persistentVolumeClaim:
+      #    claimName: pvc-kibana-data

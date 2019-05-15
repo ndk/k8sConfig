@@ -316,11 +316,11 @@ spec:
       - path: /
         backend:
           serviceName: rexsystems-web-production
-          servicePort: 80
+          servicePort: 3000
       - path: /api
         backend:
           serviceName: rexsystems-api-production
-          servicePort: 80
+          servicePort: 8090
 
   - host: www.rexsystems.co.uk
     http:
@@ -328,11 +328,11 @@ spec:
       - path: /
         backend:
           serviceName: rexsystems-web-production
-          servicePort: 80
+          servicePort: 3000
       - path: /api
         backend:
           serviceName: rexsystems-api-production
-          servicePort: 80
+          servicePort: 8090
 
   - host: ideahopper.org
     http:
@@ -340,11 +340,11 @@ spec:
       - path: /
         backend:
           serviceName: ideahopper-web-production
-          servicePort: 80
+          servicePort: 3000
       - path: /api
         backend:
           serviceName: ideahopper-api-production
-          servicePort: 80
+          servicePort: 8090
 #  tls:
 #  - secretName: tls-secret-rexsystems-co-uk
 #  - secretName: tls-secret-www-rexsystems-co-uk
@@ -448,16 +448,16 @@ spec:
       - path: /
         backend:
           serviceName: rexapp-web-dev
-          servicePort: 80
+          servicePort: 3000
       - path: /api
         backend:
           serviceName: rexapp-api-dev
-          servicePort: 80
+          servicePort: 8090
   - host: dev.api.0001.rexsystems.co.uk
       - path: /
         backend:
           serviceName: rexapp-api-dev
-          servicePort: 80
+          servicePort: 8090
 
   #ideahopper (0002)
   - host: dev.web.0002.rexsystems.co.uk
@@ -466,54 +466,54 @@ spec:
       - path: /
         backend:
           serviceName: ideahopper-web-dev
-          servicePort: 80
+          servicePort: 3000
       - path: /api
         backend:
           serviceName: ideahopper-api-dev
-          servicePort: 80
+          servicePort: 8090
   - host: dev.api.0002.rexsystems.co.uk
     http:
       paths:
       - path: /
         backend:
           serviceName: ideahopper-api-dev
-          servicePort: 80
+          servicePort: 8090
   - host: uat.web.0002.rexsystems.co.uk
     http:
       paths:
       - path: /
         backend:
           serviceName: ideahopper-web-uat
-          servicePort: 80
+          servicePort: 3000
       - path: /api
         backend:
           serviceName: ideahopper-api-uat
-          servicePort: 80
+          servicePort: 8090
   - host: uat.api.0002.rexsystems.co.uk
     http:
       paths:
       - path: /
         backend:
           serviceName: ideahopper-api-uat
-          servicePort: 80
+          servicePort: 8090
   - host: staging.web.0002.rexsystems.co.uk
     http:
       paths:
       - path: /
         backend:
           serviceName: ideahopper-web-staging
-          servicePort: 80
+          servicePort: 3000
       - path: /api
         backend:
           serviceName: ideahopper-api-staging
-          servicePort: 80
+          servicePort: 8090
   - host: staging.api.0002.rexsystems.co.uk
     http:
       paths:
       - path: /
         backend:
           serviceName: ideahopper-api-staging
-          servicePort: 80
+          servicePort: 8090
 
 
   #jenkins
@@ -1055,3 +1055,19 @@ docker images   # should see your image
 ```
 
 You can now push and pull images to/from a private docker registry. Useful for setting up CI/CD pipelines while keeping data inside your private network.
+
+
+
+### Bonus 3: ELK stack logging
+
+E: elasticsearch - store and search through collosal number of logs
+
+L: livestash - systematically send your logs to elasticsearch
+
+K: Kibana - log visualization
+
+`vim deployment.elk`
+
+```
+
+```
