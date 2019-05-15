@@ -28,6 +28,8 @@ spec:
         env:
         - name: discovery.type
           value: single-node
+        - name: ES_JAVA_OPTS
+          value: "-Xms1g -Xmx1g"
         #- name: sonar.jdbc.url
         #  value: jdbc:postgresql://postgres.default.svc.cluster.local/sonar
         #- name: sonar.jdbc.password
