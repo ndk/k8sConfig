@@ -1182,4 +1182,11 @@ And update ingress-auth.yaml with the following lines to enable authentication:
       backend:
         serviceName: artifactory
         servicePort: 5601
+
+
+
+
+...
+
+- secretName: tls-secret-kibana-rexsystems-co-uk
 ```

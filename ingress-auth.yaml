@@ -143,7 +143,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: artifactory
+          serviceName: kibana
           servicePort: 5601
 
   tls:
@@ -160,3 +160,4 @@ spec:
   - secretName: tls-secret-jenkins-rexsystems-co-uk
   - secretName: tls-secret-sonarqube-rexsystems-co-uk
   - secretName: tls-secret-artifactory-rexsystems-co-uk
+  - secretName: tls-secret-kibana-rexsystems-co-uk
