@@ -850,6 +850,9 @@ sudo crontab -e
 00 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh rexsystems.co.uk
 02 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh www.rexsystems.co.uk
 04 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh jenkins.rexsystems.co.uk
+04 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh sonarqube.rexsystems.co.uk
+05 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh artifactory.rexsystems.co.uk
+06 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh kibana.rexsystems.co.uk
 10 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh ideahopper.org
 16 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.web.0001.rexsystems.co.uk
 18 03 01 Jan,Mar,May,Jul,Sep,Nov * /home/ehynes/k8sConfig/renew-and-restart.sh dev.api.0001.rexsystems.co.uk
@@ -1071,10 +1074,87 @@ Notes:
 - let's not bother with livestash for now...
 - elasticsearch port 9200 is exposed internally in the cluster
 - kibana maps to a https end-point (with htaccess password)
+- beautifully, kibana's config is persisently stored in elasticsearch :)
 
 `vim deployment.elk`
 
 ```
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:7.0.1
+        ports:
+        - containerPort: 9200
+          protocol: TCP
+        - containerPort: 9300
+          protocol: TCP
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: "/usr/share/elasticsearch/data/"
+        #- name: sonar-extensions
+        #  mountPath: "/opt/sonarqube/extensions/"
+        env:
+        - name: discovery.type
+          value: single-node
+        - name: ES_JAVA_OPTS
+          value: "-Xms1g -Xmx1g"
+        #- name: sonar.jdbc.url
+        #  value: jdbc:postgresql://postgres.default.svc.cluster.local/sonar
+        #- name: sonar.jdbc.password
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: sonar-postgres-pword
+        #      key: SONAR_POSTGRES_PASSWORD
+      volumes:
+      - name: elasticsearch-data
+        persistentVolumeClaim:
+          claimName: pvc-elasticsearch-data
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: kibana:7.0.1
+        ports:
+        - containerPort: 5601
+          protocol: TCP
+        #volumeMounts:   # don't need this! :) Stored in elastic search!!! :)
+        #- name: kibana-data
+        #  mountPath: "/usr/share/kibana/data/"
+        env:
+        - name: ELASTICSEARCH_URL
+          value: http://elasticsearch.default.svc.cluster.local:9200
+      #volumes:
+      #- name: kibana-data
+      #  persistentVolumeClaim:
+      #    claimName: pvc-kibana-data
 
 ```
 
@@ -1086,8 +1166,20 @@ and
 
 `microk8s.kubectl create service clusterip kibana --tcp=5601:5601`
 
-And update ingress-auth.yaml with the following lines:
+#### check with:
+
+`curl http://elasticsearch.default.svc.cluster.local:9200` and `curl 10.152.183.30:5601/app/kibana`
+
+
+And update ingress-auth.yaml with the following lines to enable authentication:
 
 ```
-
+#kibana
+- host: kibana.rexsystems.co.uk
+  http:
+    paths:
+    - path: /
+      backend:
+        serviceName: artifactory
+        servicePort: 5601
 ```

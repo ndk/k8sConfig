@@ -137,6 +137,14 @@ spec:
           serviceName: artifactory
           servicePort: 80
 
+  #kibana
+  - host: kibana.rexsystems.co.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: artifactory
+          servicePort: 5601
 
   tls:
   - secretName: tls-secret-dev-web-0000-rexsystems-co-uk
