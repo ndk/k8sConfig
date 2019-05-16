@@ -259,14 +259,14 @@ Here are the required DNS records:
 
 * **A record**: rexsystems.co.uk - 99.80.128.68
 * **A record**: ideahopper.org - 99.80.128.68
-* **A record**: dev.web.0001.rexsystems.co.uk - 99.80.128.68
-* **A record**: dev.api.0001.rexsystems.co.uk - 99.80.128.68
-* **A record**: dev.web.0002.rexsystems.co.uk - 99.80.128.68
-* **A record**: dev.api.0002.rexsystems.co.uk - 99.80.128.68
-* **A record**: uat.web.0002.rexsystems.co.uk - 99.80.128.68
-* **A record**: uat.api.0002.rexsystems.co.uk - 99.80.128.68
-* **A record**: staging.web.0002.rexsystems.co.uk - 99.80.128.68
-* **A record**: staging.api.0002.rexsystems.co.uk - 99.80.128.68
+* **CNAME record**: dev.web.0001.rexsystems.co.uk - rexsystems.co.uk.
+* **CNAME record**: dev.api.0001.rexsystems.co.uk - rexsystems.co.uk.
+* **CNAME record**: dev.web.0002.rexsystems.co.uk - rexsystems.co.uk.
+* **CNAME record**: dev.api.0002.rexsystems.co.uk - rexsystems.co.uk.
+* **CNAME record**: uat.web.0002.rexsystems.co.uk - rexsystems.co.uk.
+* **CNAME record**: uat.api.0002.rexsystems.co.uk - rexsystems.co.uk.
+* **CNAME record**: staging.web.0002.rexsystems.co.uk - rexsystems.co.uk.
+* **CNAME record**: staging.api.0002.rexsystems.co.uk - rexsystems.co.uk.
 
 When using production infrastructure, simply update the DNS records.
 
@@ -1066,7 +1066,27 @@ L: livestash - systematically send your logs to elasticsearch
 
 K: Kibana - log visualization
 
+Notes:
+
+- let's not bother with livestash for now...
+- elasticsearch port 9200 is exposed internally in the cluster
+- kibana maps to a https end-point (with htaccess password)
+
 `vim deployment.elk`
+
+```
+
+```
+
+And create two services:
+
+`microk8s.kubectl create service clusterip elasticsearch --tcp=9200:9200 --tcp=9300:9300`
+
+and
+
+`microk8s.kubectl create service clusterip kibana --tcp=5601:5601`
+
+And update ingress-auth.yaml with the following lines:
 
 ```
 
