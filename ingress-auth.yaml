@@ -9,6 +9,11 @@ metadata:
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
 
     nginx.ingress.kubernetes.io/rewrite-target: /
+
+    # rate limiting
+    nginx.ingress.kubernetes.io/limit-connections: "100"
+    nginx.ingress.kubernetes.io/limit-rpm: "100"
+    nginx.ingress.kubernetes.io/limit-rps: "5"
 spec:
   rules:
 
