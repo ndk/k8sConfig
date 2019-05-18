@@ -10,10 +10,30 @@ metadata:
 
     nginx.ingress.kubernetes.io/rewrite-target: /
 
-    # rate limiting
-    nginx.ingress.kubernetes.io/limit-connections: "100"
-    nginx.ingress.kubernetes.io/limit-rpm: "100"
-    nginx.ingress.kubernetes.io/limit-rps: "5"
+    ### rate limiting
+    ### N.B. doesn't work for clusterip services?
+    ### externalTrafficPolicy: Local - LoadBalancer and NodePort OK
+    ### See: https://github.com/kubernetes/kubernetes/issues/62537#issuecomment-381944569
+    ### Also see: https://kubernetes.io/docs/tutorials/services/source-ip/
+    # nginx.ingress.kubernetes.io/limit-connections: "100"
+    # nginx.ingress.kubernetes.io/limit-rpm: "100"
+    # nginx.ingress.kubernetes.io/limit-rps: "5"
+
+    ### nginx rate limiting
+    # See: https://stackoverflow.com/questions/54042445/set-limit-req-for-specific-location-in-nginx-ingress
+    # Also see: https://www.nginx.com/blog/rate-limiting-nginx/
+    http-snippet: |
+      map $uri $with_limit_req {
+        default 0;
+        "~*^/auth$" 1;
+      }
+      map $with_limit_req $auth_limit_req_key {
+        default '';
+        '1'     $binary_remote_addr;   # the limit key
+      }
+      limit_req_zone $binary_remote_addr zone=mylimit:10m rate=5r/s;   # 10 MB cache, 5 requests/sec
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      limit_req zone=mylimit nodelay;
 spec:
   rules:
 
