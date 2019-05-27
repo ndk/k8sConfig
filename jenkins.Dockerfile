@@ -11,7 +11,7 @@ USER root
 RUN apt-get update
 
 # Prerequisites:
-RUN apt-get install -y curl software-properties-common telnet zip vim apt-transport-https
+RUN apt-get install -y curl software-properties-common telnet zip vim apt-transport-https yq
 
 # Install node and npm (building JS apps):
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -

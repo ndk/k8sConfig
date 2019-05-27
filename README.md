@@ -1076,7 +1076,7 @@ Notes:
 - kibana maps to a https end-point (with htaccess password)
 - beautifully, kibana's config is persisently stored in elasticsearch :)
 
-`vim deployment.elk`
+`vim deployment-elk.yaml`
 
 ```
 kind: Deployment
@@ -1190,3 +1190,51 @@ And update ingress-auth.yaml with the following lines to enable authentication:
 
 - secretName: tls-secret-kibana-rexsystems-co-uk
 ```
+
+### Bonus 4: General purpose file storage server
+
+`microk8s.kubectl create deployment gp --image=ubuntu:latest`
+
+View with:
+`microk8s.kubectl get deployments`
+
+More detailed info:
+
+`microk8s.kubectl describe deployment gp`
+
+On your Mac, do:
+
+`ssh-keygen -f id_rsa.gp`
+
+copy the keypair to ~/.ssh on your k8s box:
+
+`scp id_rsa.gp* $UNAME@$EC2_ADDR:~/.ssh/`
+
+`touch known_hosts.gp && scp known_hosts.gp $UNAME@$EC2_ADDR:~/.ssh/`
+
+`ssh $EC2_ADDR`
+
+Create a secret:
+
+`microk8s.kubectl create secret generic ssh-jenkins --from-file=id_rsa=/home/$UNAME/.ssh/id_rsa.gp --from-file=id_rsa.pub=/home/$USER/.ssh/id_rsa.gp.pub --from-file=known_hosts=/home/$USER/.ssh/known_hosts.gp`
+
+
+- Note: this command renames the file: --from-file=<name on the cluster>=<local file>
+- Note: must use absolute paths...
+- Note: the Jenkins LTS container searches for ssh keypair in /var/jenkins_home/.ssh/ by default :)
+
+Start deployment with:
+
+`microk8s.kubectl create -f deployment-gp.yaml`
+
+Attach a service to it:
+
+`microk8s.kubectl create service clusterip gp --tcp=8080:8080`
+
+Get the IP address:
+
+`microk8s.kubectl get service gp`
+
+Check in a web browser:
+
+`curl https://<IP_ADDRESS>`
