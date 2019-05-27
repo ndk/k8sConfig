@@ -8,7 +8,7 @@ FROM jenkins/jenkins:lts
 #FROM jenkins/jenkins:lts-alpine
 
 USER root
-RUN add-apt-repository ppa:rmescandon/yq
+RUN apt-add-repository ppa:rmescandon/yq
 RUN apt-get update
 
 # Prerequisites:
