@@ -17,7 +17,8 @@ RUN apt-get install -y curl software-properties-common telnet zip vim apt-transp
 # yq:
 ENV GOPATH=/usr
 RUN go get gopkg.in/mikefarah/yq.v2
-RUN chmod +x /usr/bin/yq
+RUN ln -s /usr/bin/yq.v2 /usr/bin/yq
+#RUN chmod +x /usr/bin/yq
 
 # Install node and npm (building JS apps):
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
