@@ -14,9 +14,10 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 # Prerequisites:
 RUN apt-get update
 RUN apt-get install -y curl software-properties-common telnet zip vim apt-transport-https golang
-# jq:
-RUN wget -c https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 > /usr/bin/jq
-RUN chmod +x /usr/bin/jq
+# yq:
+ENV GOPATH=/usr
+RUN go get gopkg.in/mikefarah/yq.v2
+RUN chmod +x /usr/bin/yq
 
 # Install node and npm (building JS apps):
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
