@@ -10,6 +10,7 @@ FROM jenkins/jenkins:lts
 USER root
 RUN apt-get update
 RUN apt-get install -y software-properties-common
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 RUN apt-add-repository -y ppa:rmescandon/yq
 RUN apt-get update
 
