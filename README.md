@@ -1211,11 +1211,12 @@ Save to:
 
 Also want to add the Jenkins public key to the artifactory `authorized_keys`:
 
-`cat ~/.ssh/id_rsa.artifactory.pub >> ~/.ssh/authorized_keys.jenkins`
+`cat ~/.ssh/id_rsa.jenkins.pub >> ~/.ssh/authorized_keys.artifactory`
 
 Jenkins k8s secret:
 
-`microk8s.kubectl create secret generic ssh-jenkins --from-file=id_rsa=/home/ehynes/.ssh/id_rsa.jenkins --from-file=id_rsa.pub=/home/ehynes/.ssh/id_rsa.jenkins.pub --from-file=authorized_keys=/home/ehynes/.ssh/authorized_keys.jenkins`
+`microk8s.kubectl delete secret ssh-jenkins`
+`microk8s.kubectl create secret generic ssh-jenkins --from-file=id_rsa=/home/ehynes/.ssh/id_rsa.jenkins --from-file=id_rsa.pub=/home/ehynes/.ssh/id_rsa.jenkins.pub --from-file=known_hosts=/home/ehynes/.ssh/known_hosts.jenkins`
 
 View with:
 
@@ -1223,7 +1224,8 @@ View with:
 
 artifactory k8s secret:
 
-`microk8s.kubectl create secret generic ssh-artifactory --from-file=id_rsa=/home/ehynes/.ssh/id_rsa.artifactory --from-file=id_rsa.pub=/home/ehynes/.ssh/id_rsa.artifactory.pub`
+`microk8s.kubectl delete secret ssh-artifactory`
+`microk8s.kubectl create secret generic ssh-artifactory --from-file=id_rsa=/home/ehynes/.ssh/id_rsa.artifactory --from-file=id_rsa.pub=/home/ehynes/.ssh/id_rsa.artifactory.pub --from-file=authorized_keys=/home/ehynes/.ssh/authorized_keys.artifactory`
 
 View with:
 
@@ -1237,6 +1239,18 @@ Start a deployment with:
 
 `microk8s.kubectl apply -f deployment-artifactory.yaml`
 
-And create a corresponding service:
+And create a corresponding artifactory service:
 
 `microk8s.kubectl create service clusterip artifactory --tcp=80:80 --tcp=22:22`
+
+Now login to artifactory with:
+
+`microk8s.kubectl exec -it jenkins-699484678d-pdwvh -- /bin/bash`
+
+nslookup won't work:
+
+`getent hosts artifactory.default.svc.cluster.local`
+
+Now try to ssh to root@artifactory.default.svc.cluster.local:
+
+`ssh -vvvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@artifactory.default.svc.cluster.local`
