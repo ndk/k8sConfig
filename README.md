@@ -1180,7 +1180,7 @@ And update ingress-auth.yaml with the following lines to enable authentication:
     paths:
     - path: /
       backend:
-        serviceName: artifactory
+        serviceName: kibana
         servicePort: 5601
 
 
@@ -1190,3 +1190,53 @@ And update ingress-auth.yaml with the following lines to enable authentication:
 
 - secretName: tls-secret-kibana-rexsystems-co-uk
 ```
+
+### Artifactory
+
+A place to store your build artifacts (output from Jenkins).
+
+We need to be able to login to the artifactory pod from Jenkins pod.
+
+On Jenkins, need to be able to do passwordless login:
+
+`ssh ssh artifactory.default.svc.cluster.local`
+
+On the host machine k8s machine, do:
+
+`ssh-keygen`
+
+Save to:
+
+`~/.ssh/id_rsa.artifactory`
+
+Also want to add the Jenkins public key to the artifactory `authorized_keys`:
+
+`cat ~/.ssh/id_rsa.artifactory.pub >> ~/.ssh/authorized_keys.jenkins`
+
+Jenkins k8s secret:
+
+`microk8s.kubectl create secret generic ssh-jenkins --from-file=id_rsa=/home/ehynes/.ssh/id_rsa.jenkins --from-file=id_rsa.pub=/home/ehynes/.ssh/id_rsa.jenkins.pub --from-file=authorized_keys=/home/ehynes/.ssh/authorized_keys.jenkins`
+
+View with:
+
+`microk8s.kubectl get secrets ssh-jenkins -o yaml`
+
+artifactory k8s secret:
+
+`microk8s.kubectl create secret generic ssh-artifactory --from-file=id_rsa=/home/ehynes/.ssh/id_rsa.artifactory --from-file=id_rsa.pub=/home/ehynes/.ssh/id_rsa.artifactory.pub`
+
+View with:
+
+`microk8s.kubectl get secrets ssh-artifactory -o yaml`
+
+Ensure `~/.ssh/authorized_keys[.jenkins|.artifactory]`, `~/.ssh/id_rsa.jenkins[.pub]` and `~/.ssh/id_rsa.artifactory[.pub]` are all mounted in the deployment files! (`deployment-artifactory.yaml` and `deployment-jenkins.yaml`)
+
+Must make sure this keypair is mounted in `deployment-artifactory.yaml`
+
+Start a deployment with:
+
+`microk8s.kubectl apply -f deployment-artifactory.yaml`
+
+And create a corresponding service:
+
+`microk8s.kubectl create service clusterip artifactory --tcp=80:80 --tcp=22:22`
