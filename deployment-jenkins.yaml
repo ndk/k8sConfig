@@ -37,7 +37,7 @@ spec:
             claimName: pvc-jenkins
         - name: ssh-volume
           secret:
-          secretName: ssh-jenkins
+            secretName: ssh-jenkins
         - name: docker-sock-volume
           hostPath:
             path: /var/run/docker.sock
