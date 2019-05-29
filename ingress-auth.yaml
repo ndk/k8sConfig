@@ -32,8 +32,13 @@ metadata:
         '1'     $binary_remote_addr;   # the limit key
       }
       limit_req_zone $binary_remote_addr zone=mylimit:10m rate=5r/s;   # 10 MB cache, 5 requests/sec
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      limit_req zone=mylimit nodelay;
+      #add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-src 'self'; object-src 'none'";
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        limit_req zone=mylimit nodelay;
+        # additional headers:
+        # TODO - check
+        more_set_headers X-XSS-Protection "1; mode=block";
+
 spec:
   rules:
 
