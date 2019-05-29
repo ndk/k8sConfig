@@ -24,21 +24,26 @@ spec:
         - containerPort: 22
           protocol: TCP
         volumeMounts:
-          - name: artifactory-nginx-volume
+          # - name: artifactory-nginx-volume
+          #   mountPath: "/usr/share/nginx/html"
+          - name: artifactory-storage
             mountPath: "/usr/share/nginx/html"
           - name: artifactory-nginx-conf
             mountPath: "/etc/nginx/nginx.conf"
-          - name: ssh-volume
-            mountPath: "/root/.ssh"
+          # - name: ssh-volume
+          #   mountPath: "/root/.ssh"
       volumes:
-      - name: artifactory-nginx-volume
-        hostPath:
-          path: /mnt/artifactory
-          type: Directory
+      # - name: artifactory-nginx-volume
+      #   hostPath:
+      #     path: /mnt/artifactory
+      #     type: Directory
+      - name: artifactory-storage
+        persistentVolumeClaim:
+          claimName: pvc-artifactory-storage
       - name: artifactory-nginx-conf
         hostPath:
           path: /home/ehynes/k8sConfig/nginx.artifactory.conf
           type: File
-      - name: ssh-volume
-        secret:
-          secretName: ssh-artifactory
+      # - name: ssh-volume
+      #   secret:
+      #     secretName: ssh-artifactory

@@ -23,21 +23,23 @@ spec:
         volumeMounts:
           - name: storage
             mountPath: "/var/jenkins_home"
-          - name: ssh-volume
-            mountPath: "/var/jenkins_home/.ssh"
+          # - name: ssh-volume
+          #   mountPath: "/var/jenkins_home/.ssh"
             # `docker` inside Docker won't work! Pass up to the host's docker :)
             # Note: it is very important to adjust the container docker's gid to be the same as the host docker gid
           - name: docker-sock-volume
             mountPath: /var/run/docker.sock
           - name: kube-config
             mountPath: ~/.kube/config
+          - name: artifactory-storage
+            mountPath: "/mnt/artifactory"
       volumes:
         - name: storage
           persistentVolumeClaim:
             claimName: pvc-jenkins
-        - name: ssh-volume
-          secret:
-            secretName: ssh-jenkins
+        # - name: ssh-volume
+        #   secret:
+        #     secretName: ssh-jenkins
         - name: docker-sock-volume
           hostPath:
             path: /var/run/docker.sock
@@ -46,3 +48,6 @@ spec:
           hostPath:
             path: /home/ehynes/.kube/config.jenkins
             type: File   ##local file! :)
+        - name: artifactory-storage
+          persistentVolumeClaim:
+            claimName: pvc-artifactory-storage
