@@ -22,7 +22,7 @@ spec:
       - path: /api
         backend:
           serviceName: rexsystems-api-production
-          servicePort: 3000
+          servicePort: 8090
 
   - host: www.rexsystems.co.uk
     http:
@@ -34,8 +34,8 @@ spec:
       - path: /api
         backend:
           serviceName: rexsystems-api-production
-          servicePort: 3000
-  
+          servicePort: 8090
+
   - host: rexapp.rexsystems.co.uk
     http:
       paths:
@@ -46,7 +46,7 @@ spec:
       - path: /api
         backend:
           serviceName: rexapp-api-production
-          servicePort: 3000
+          servicePort: 8090
 
   - host: ideahopper.org
     http:
@@ -58,7 +58,7 @@ spec:
       - path: /api
         backend:
           serviceName: ideahopper-api-production
-          servicePort: 3000
+          servicePort: 8090
   tls:
     - secretName: tls-secret-rexsystems-co-uk
     - secretName: tls-secret-www-rexsystems-co-uk
