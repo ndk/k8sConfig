@@ -13,7 +13,7 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 
 # Prerequisites:
 RUN apt-get update
-RUN apt-get install -y curl software-properties-common telnet zip vim apt-transport-https golang
+RUN apt-get install -y curl software-properties-common telnet zip vim apt-transport-https golang gettext-base
 # yq:
 ENV GOPATH=/usr
 RUN go get gopkg.in/mikefarah/yq.v2
