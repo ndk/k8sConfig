@@ -4,6 +4,9 @@
 # push with:
 # docker push localhost:32000/jenkins-with-docker
 
+# start with:
+# microk8s.kubectl apply -f deployment-jenkins.yaml
+
 FROM jenkins/jenkins:lts
 #FROM jenkins/jenkins:lts-alpine
 
