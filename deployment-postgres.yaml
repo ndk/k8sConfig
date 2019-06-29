@@ -1,3 +1,6 @@
+# Connect with:
+# psql -h postgres.default.svc.cluster.local -U hynese defaultdb
+
 kind: Deployment
 apiVersion: apps/v1
 metadata:

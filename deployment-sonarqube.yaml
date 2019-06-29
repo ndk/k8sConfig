@@ -1,3 +1,6 @@
+# check postgres working OK:
+# psql -h postgres.default.svc.cluster.local -d sonar -U sonar
+
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -39,4 +42,4 @@ spec:
           claimName: pvc-sonarqube-data
       - name: sonar-extensions
         persistentVolumeClaim:
-          claimName: pvc-sonarqube-extensions 
+          claimName: pvc-sonarqube-extensions
