@@ -91,9 +91,13 @@ sudo apt-get dist-upgrade
 sudo apt-get autoremove
 ```
 
+Then install snap:
+
+```sudo apt install snapd```
+
 Now install microk8s:
 
-`sudo snap install microk8s - classic`
+```sudo snap install microk8s --classic```
 
 Add microk8s.kubctl to your path
 
@@ -108,7 +112,7 @@ Confirm microk8s is running with:
 
 Get more detail on current state with:
 
-`microk8s.kubectl get all - all-namespaces`
+`microk8s.kubectl get all --all-namespaces`
 
 Before we do anything further, there are some firewall additions we need to make (double-check settings and do your own research). Also as we're running microk8s on a public IP address, we need to constrain public access to only those ports that are needed (port 22, 80 and 443).
 
