@@ -146,7 +146,7 @@ sudo microk8s.start
 
 Now if we do:
 
-`microk8s.kubectl get all - all-namespaces`
+```microk8s.kubectl get all --all-namespaces```
 
 Everything should look in order.
 
@@ -204,7 +204,9 @@ It's worth researching details on each type of service. In a production system (
 
 Now that nginx is running and we've exposed a clusterip service, let's get the ip address:
 
-`microk8s.kubectl get all --all-namespaces`
+```
+microk8s.kubectl get all --all-namespaces
+```
 
 Once we get the ip address, simply type it into a web browser on your development maching (in my case Brave browser on a Mac):
 
