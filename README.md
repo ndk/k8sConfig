@@ -97,7 +97,11 @@ Then install snap:
 
 Now install microk8s:
 
-```sudo snap install microk8s --classic```
+```
+sudo snap install microk8s --classic
+sudo usermod -a -G microk8s $USER
+sudo chown -f -R $USER ~/.kube
+```
 
 Add microk8s.kubctl to your path
 
