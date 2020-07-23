@@ -130,7 +130,7 @@ net.ipv4.ip_forward=1
 # and enable with:
 sudo sysctl -p
 # Also need to tweak the cbr0 bridge interface ufw rules slightly:
-sudo ufw allow in on cbr0 && sudo ufw allow out on cbr0
+sudo ufw allow in on cni0 && sudo ufw allow out on cni0
 # Allow routing:
 sudo ufw default allow routed
 # Allow ssh, http and https:
